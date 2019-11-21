@@ -42,9 +42,13 @@ $(document).ready(function (){
         }
     });
 
-    $('.menu-btn').on('click', function(e){
+    $('.menu-btn:not(.lang)').on('click', function(e){
         e.preventDefault();
     });
+
+    $('#checkout_paypal').on('click', function(){
+      $('#shipping-form').submit()
+    })
 
     $('#sendTestEmail').on('click', function(e){
         e.preventDefault();
@@ -576,6 +580,8 @@ $(document).ready(function (){
     });
 
     $(document).on('click', '.add-to-cart', function(e){
+        e.preventDefault()
+
         var productLink = '/product/' + $(this).attr('data-id');
         if($(this).attr('data-link')){
             productLink = '/product/' + $(this).attr('data-link');
@@ -583,7 +589,7 @@ $(document).ready(function (){
 
         if($(this).attr('data-has-options') === 'true'){
             window.location = productLink;
-        }else{
+        } else {
             $.ajax({
                 method: 'POST',
                 url: '/product/addtocart',

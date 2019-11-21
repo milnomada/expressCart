@@ -1,30 +1,45 @@
 {
-  "name": "express-cart",
-  "version": "1.1.14",
-  "description": "A fully functioning Node.js shopping cart with Stripe, PayPal and Authorize.net payments.",
-  "private": false,
-  "scripts": {
-    "start": "node app.js",
-    "deploy": "gulp deploy",
-    "testdata": "node lib/testdata.js",
-    "test": "ava",
-    "dev": "nodemon app.js",
-    "lint": "eslint ./"
+  "_from": "express-cart",
+  "_id": "express-cart@1.1.14",
+  "_inBundle": false,
+  "_integrity": "sha512-i05ULs1VQ9clxRb1wOJAWfHAEUHkeByGS3bURSqnbHLJR3mstevc374ut3InlSJgAnrog50bWiF+4RzdURo7qA==",
+  "_location": "/express-cart",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "express-cart",
+    "name": "express-cart",
+    "escapedName": "express-cart",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/express-cart/-/express-cart-1.1.14.tgz",
+  "_shasum": "31cc6a79e17c603a24bce756f9a95b335911ab04",
+  "_spec": "express-cart",
+  "_where": "/usr/local/www/ecommerce/expressCart",
+  "author": {
+    "name": "Mark Moffat"
   },
   "ava": {
     "serial": true,
     "files": [
       "./test/specs/*.js"
     ],
-    "timeout": "10s",
     "verbose": true,
     "environmentVariables": {
       "NODE_ENV": "test"
     }
   },
-  "engines": {
-    "node": "10.16.0"
+  "bugs": {
+    "url": "https://github.com/mrvautin/expressCart/issues"
   },
+  "bundleDependencies": false,
   "dependencies": {
     "@adyen/api-library": "^2.1.7",
     "ajv": "^6.10.2",
@@ -32,7 +47,6 @@
     "axios": "^0.19.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
-    "cheerio": "^0.22.0",
     "colors": "^1.4.0",
     "connect-mongodb-session": "^2.2.0",
     "cookie-parser": "^1.4.4",
@@ -43,6 +57,7 @@
     "helmet": "^3.21.2",
     "html-entities": "^1.2.0",
     "i18n": "^0.8.4",
+    "jsonschema": "^1.2.4",
     "lodash": "^4.17.15",
     "lunr": "^2.3.8",
     "mime-type": "^3.0.7",
@@ -52,6 +67,7 @@
     "mongodb-uri": "^0.9.7",
     "morgan": "^1.9.1",
     "multer": "^1.4.2",
+    "mustache": "3.1.0",
     "node-cron": "^2.0.3",
     "nodemailer": "^4.7.0",
     "numeral": "^2.0.6",
@@ -64,6 +80,8 @@
     "stripe": "^7.12.0",
     "uglifycss": "0.0.27"
   },
+  "deprecated": false,
+  "description": "A fully functioning Node.js shopping cart with Stripe, PayPal and Authorize.net payments.",
   "devDependencies": {
     "ava": "^2.4.0",
     "eslint": "^6.6.0",
@@ -72,7 +90,7 @@
     "eslint-plugin-node": "^9.2.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "gulp": "^4.0.2",
+    "gulp": "4.0.2",
     "gulp-clean-css": "^3.10.0",
     "gulp-minify": "^3.1.0",
     "gulp-rename": "^1.4.0",
@@ -80,7 +98,10 @@
     "supertest": "^3.4.2",
     "supertest-session": "^4.0.0"
   },
-  "main": "app.js",
+  "engines": {
+    "node": "10.16.0"
+  },
+  "homepage": "https://expresscart.markmoffat.com",
   "keywords": [
     "Shopping cart",
     "express",
@@ -95,14 +116,21 @@
     "cart",
     "shopping"
   ],
-  "author": "Mark Moffat",
-  "homepage": "https://expresscart.markmoffat.com",
+  "license": "MIT",
+  "main": "app.js",
+  "name": "express-cart",
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mrvautin/expressCart.git"
   },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mrvautin/expressCart/issues"
-  }
+  "scripts": {
+    "deploy": "gulp deploy",
+    "dev": "nodemon app.js",
+    "lint": "eslint ./",
+    "start": "node app.js",
+    "test": "ava",
+    "testdata": "node lib/testdata.js"
+  },
+  "version": "1.1.14"
 }

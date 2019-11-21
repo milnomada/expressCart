@@ -170,6 +170,8 @@ router.get('/product/:id', async (req, res) => {
     // show the view
     const images = await getImages(product._id, req, res);
 
+    console.log(product)
+
     res.render(`${config.themeViews}product`, {
         title: product.productTitle,
         result: product,
@@ -385,7 +387,7 @@ router.post('/product/addtocart', async (req, res, next) => {
         }
     }
 
-    const productPrice = parseFloat(product.productPrice).toFixed(2);
+    var productPrice = parseFloat(product.productPrice).toFixed(2);
 
     // Doc used to test if existing in the cart with the options. If not found, we add new.
     let options = {};
@@ -425,6 +427,7 @@ router.post('/product/addtocart', async (req, res, next) => {
         productObj.totalItemPrice = productPrice * productQuantity;
         productObj.options = options;
         productObj.productImage = product.productImage;
+        productObj.productDiscount = product.productDiscount
         productObj.productComment = productComment;
         productObj.productSubscription = product.productSubscription;
         if(product.productPermalink){

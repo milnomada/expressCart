@@ -25,6 +25,15 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="productDiscount" class="col-sm-2 control-label">{{ @root.__ "Product discount" }}</label>
+                <div class="col-sm-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">{{currencySymbol config.currencySymbol}}</span>
+                        <input type="number" name="productDiscount" class="form-control" step="any" value="{{result.productDiscount}}" required/>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="productPublished" class="col-sm-2 control-label">{{ @root.__ "Status" }}</label>
                 <div class="col-sm-6">
                     <select class="form-control" id="productPublished" name="productPublished">

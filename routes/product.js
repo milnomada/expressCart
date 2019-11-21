@@ -92,6 +92,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         productPermalink: req.body.productPermalink,
         productTitle: common.cleanHtml(req.body.productTitle),
         productPrice: common.safeParseInt(req.body.productPrice),
+        productDiscount: common.safeParseInt(req.body.productDiscount),
         productDescription: common.cleanHtml(req.body.productDescription),
         productPublished: common.convertBool(req.body.productPublished),
         productTags: req.body.productTags,
@@ -102,15 +103,15 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
     };
 
     // Validate the body again schema
-    const schemaValidate = validateJson('newProduct', doc);
-    if(!schemaValidate.result){
+    const schemaResult = validateJson('newProduct', doc);
+    if(!schemaResult.valid){
         // If API request, return json
         if(req.apiAuthenticated){
-            res.status(400).json(schemaValidate.errors);
+            res.status(400).json(schemaResult.errors);
             return;
         }
 
-        console.log('schemaValidate errors', schemaValidate.errors);
+        console.log('schemaResult errors', schemaResult.errors);
         req.session.message = 'Form invalid. Please check values and try again.';
         req.session.messageType = 'danger';
 
@@ -118,6 +119,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         req.session.productTitle = req.body.productTitle;
         req.session.productDescription = req.body.productDescription;
         req.session.productPrice = req.body.productPrice;
+        req.session.productDiscount = req.body.productDiscount;
         req.session.productPermalink = req.body.productPermalink;
         req.session.productOptions = productOptions;
         req.session.productComment = common.checkboxBool(req.body.productComment);
@@ -140,6 +142,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         req.session.productTitle = req.body.productTitle;
         req.session.productDescription = req.body.productDescription;
         req.session.productPrice = req.body.productPrice;
+        req.session.productDiscount = req.body.productDiscount;
         req.session.productPermalink = req.body.productPermalink;
         req.session.productOptions = productOptions;
         req.session.productComment = common.checkboxBool(req.body.productComment);
@@ -184,6 +187,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         req.session.productTitle = req.body.productTitle;
         req.session.productDescription = req.body.productDescription;
         req.session.productPrice = req.body.productPrice;
+        req.session.productDiscount = req.body.productDiscount;
         req.session.productPermalink = req.body.productPermalink;
         req.session.productOptions = productOptions;
         req.session.productComment = common.checkboxBool(req.body.productComment);
@@ -306,6 +310,7 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         req.session.productTitle = req.body.productTitle;
         req.session.productDescription = req.body.productDescription;
         req.session.productPrice = req.body.productPrice;
+        req.session.productDiscount = req.body.productDiscount;
         req.session.productPermalink = req.body.productPermalink;
         req.session.productTags = req.body.productTags;
         req.session.productOptions = req.body.productOptions;
@@ -332,6 +337,7 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         productPermalink: req.body.productPermalink,
         productTitle: common.cleanHtml(req.body.productTitle),
         productPrice: common.safeParseInt(req.body.productPrice),
+        productDiscount: common.safeParseInt(req.body.productDiscount),
         productDescription: common.cleanHtml(req.body.productDescription),
         productPublished: common.convertBool(req.body.productPublished),
         productTags: req.body.productTags,
@@ -341,11 +347,11 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
     };
 
     // Validate the body again schema
-    const schemaValidate = validateJson('editProduct', productDoc);
-    if(!schemaValidate.result){
+    const schemaResult = validateJson('editProduct', productDoc);
+    if(!schemaResult.valid){
         // If API request, return json
         if(req.apiAuthenticated){
-            res.status(400).json(schemaValidate.errors);
+            res.status(400).json(schemaResult.errors);
             return;
         }
 
@@ -356,6 +362,7 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         req.session.productTitle = req.body.productTitle;
         req.session.productDescription = req.body.productDescription;
         req.session.productPrice = req.body.productPrice;
+        req.session.productDiscount = req.body.productDiscount;
         req.session.productPermalink = req.body.productPermalink;
         req.session.productOptions = productOptions;
         req.session.productComment = common.checkboxBool(req.body.productComment);

@@ -1,5 +1,7 @@
 node_modules/
 data/
 /config/*-local.json
+/config/settings.json
+/public/uploads
 .vscode
 **.DS_Store

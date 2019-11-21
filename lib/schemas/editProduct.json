@@ -1,5 +1,5 @@
 {
-    "$id": "editProduct",
+    "id": "/editProduct",
     "type": "object",
     "properties": {
         "productId": {
@@ -12,8 +12,10 @@
             "type": "string"
         },
         "productPrice": {
-            "type": "number",
-            "format": "amount"
+            "type": "number"
+        },
+        "productDiscount": {
+            "type": ["number", 0]
         },
         "productDescription": {
             "type": "string"

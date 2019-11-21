@@ -181,8 +181,9 @@ handlebars = handlebars.create({
             return'false';
         },
         currencySymbol: (value) => {
+          console.log("currencySymbol", value)
             if(typeof value === 'undefined' || value === ''){
-                return'$';
+                return'€';
             }
             return value;
         },
@@ -224,6 +225,14 @@ handlebars = handlebars.create({
         },
         formatDate: (date, format) => {
             return moment(date).format(format);
+        },
+        opCalc: (v1, operator, v2) => {
+          switch(operator){
+            case '*': return (v1 * v2)
+            case '/': return (v1 * v2)
+            case '%': return (v1 - (v1/v2))
+            default: return (v1 * v2)
+          }
         },
         ifCond: (v1, operator, v2, options) => {
             switch(operator){

@@ -1,7 +1,7 @@
 {
     "mode": "sandbox",
-    "client_id": "this_is_not_real",
-    "client_secret": "this_is_not_real",
-    "paypalCartDescription": "BKLYN",
-    "paypalCurrency": "USD"
+    "client_id": "AfAAQcOleHslrfjksLhRUXRWIN4C7aEom_ExQxFI8vlsUcJ4XnCvIQTOTwr17pxkOwHiWIdpgVudLeTU",
+    "client_secret": "EOYjk5O0GAFR7g0Y7dp_0nR5Yi-ltnRw31_ClHWZOC23QW4F1Mu5edFgMugNysJZTWjt6Fo4mziLqkET",
+    "paypalCartDescription": "KALA",
+    "paypalCurrency": "EUR"
 }

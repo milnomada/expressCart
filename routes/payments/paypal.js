@@ -4,6 +4,71 @@ const { indexOrders } = require('../../lib/indexing');
 const paypal = require('paypal-rest-sdk');
 const router = express.Router();
 
+/**
+ * 
+ * @param  {http session} session         - current session
+ * @param  {paypal configuration} conf    - configuration from settings.json
+ * @return {array} Items purchased
+ */
+const productsToItems = (session, conf) => {
+  /**
+   * { productId: '5dd5be13db8a226217868773',
+       title: 'Kala 1 2',
+       quantity: 1,
+       totalItemPrice: 50,
+       options: {},
+       productImage: '/uploads/5dd5be13db8a226217868773/DSC_0039.jpg',
+       productComment: null,
+       productSubscription: null,
+       link: 'kala-1-2' }
+   */
+  var items = session.cart.map(e => { return {
+    name: e.title,
+    sku: e.title,
+    currency: conf.paypalCurrency,
+    price: e.productDiscount ? e.totalItemPrice - (e.totalItemPrice / e.productDiscount) : e.totalItemPrice,
+    quantity: e.quantity
+  } } )
+  if(session.shippingCostApplied) {
+    items.push({
+      name: "Shipping",
+      sku: `shipping-${session.customer.country}`,
+      currency: conf.paypalCurrency,
+      price: getShippingCosts(session.customer.country, session.customer.state || ""),
+      quantity: 1
+    })
+  }
+  console.log(items)
+  return items
+}
+
+const renderDescrption = (arr) => {
+  return `Kala® Shopping cart ${arr.length} items`
+}
+
+const getShippingCosts = (country, region) => {
+  // This will be improved in the future
+  switch (country) {
+    case "Spain":
+      return 10
+    case "Portugal":
+      return 10
+    case "Italy": 
+      switch(region) {
+        case "Sicily":
+          return 15
+        case "Sardenya":
+          return 15
+        default:
+          return 10
+      }
+    case "France":
+      return 10
+    default:
+      return 10
+  }
+}
+
 router.get('/checkout_cancel', (req, res, next) => {
     // return to checkout for adjustment or repayment
     res.redirect('/checkout');
@@ -42,6 +107,7 @@ router.get('/checkout_return', (req, res, next) => {
         }
 
         const paymentOrderId = req.session.orderId;
+        const cart = req.session.cart
         let paymentStatus = 'Approved';
 
         // fully approved
@@ -96,7 +162,7 @@ router.get('/checkout_return', (req, res, next) => {
 
                     // send the email with the response
                     // TODO: Should fix this to properly handle result
-                    common.sendEmail(req.session.paymentEmailAddr, 'Your payment with ' + config.cartTitle, common.getEmailTemplate(paymentResults));
+                    common.sendEmail(req.session.paymentEmailAddr, 'Your payment with ' + config.cartTitle, common.getEmailTemplate(paymentResults, cart));
 
                     res.redirect('/payment/' + order._id);
                 });
@@ -111,6 +177,8 @@ router.post('/checkout_action', (req, res, next) => {
     const config = req.app.config;
     const paypalConfig = common.getPaymentConfig();
 
+    console.log("checkout_action", req.session)
+    const items = productsToItems(req.session, paypalConfig)
     // setup the payment object
     const payment = {
         intent: 'sale',
@@ -122,11 +190,14 @@ router.post('/checkout_action', (req, res, next) => {
             cancel_url: config.baseUrl + '/paypal/checkout_cancel'
         },
         transactions: [{
+            item_list: { 
+              items: items,
+            },
             amount: {
                 total: req.session.totalCartAmount,
                 currency: paypalConfig.paypalCurrency
             },
-            description: paypalConfig.paypalCartDescription
+            description: renderDescrption(req.session.cart)
         }]
     };
 
@@ -136,6 +207,7 @@ router.post('/checkout_action', (req, res, next) => {
     // create payment
     paypal.payment.create(payment, (error, payment) => {
         if(error){
+          console.log(error)
             req.session.message = 'There was an error processing your payment. You have not been changed and can try again.';
             req.session.messageType = 'danger';
             res.redirect('/pay');

@@ -11,26 +11,13 @@ router.post('/checkout_action', (req, res, next) => {
     const config = req.app.config;
     const stripeConfig = common.getPaymentConfig();
 
-    // Create the Stripe payload
-    const chargePayload = {
-        amount: numeral(req.session.totalCartAmount).format('0.00').replace('.', ''),
-        currency: stripeConfig.stripeCurrency.toLowerCase(),
-        source: req.body.stripeToken,
-        description: stripeConfig.stripeDescription,
-        shipping: {
-            name: `${req.body.shipFirstname} ${req.body.shipLastname}`,
-            address: {
-                line1: req.body.shipAddr1,
-                line2: req.body.shipAddr2,
-                postal_code: req.body.shipPostcode,
-                state: req.body.shipState,
-                country: req.body.shipCountry
-            }
-        }
-    };
-
     // charge via stripe
-    stripe.charges.create(chargePayload, (err, charge) => {
+    stripe.charges.create({
+        amount: numeral(req.session.totalCartAmount).format('0.00').replace('.', ''),
+        currency: stripeConfig.stripeCurrency,
+        source: req.body.stripeToken,
+        description: stripeConfig.stripeDescription
+    }, (err, charge) => {
         if(err){
             console.info(err.stack);
             req.session.messageType = 'danger';

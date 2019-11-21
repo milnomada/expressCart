@@ -36,7 +36,7 @@ router.post('/checkout_action', (req, res, next) => {
     };
 
     axios.post(authorizeUrl, chargeJson, { responseType: 'text' })
-    .then(async(response) => {
+    .then((response) => {
         // This is crazy but the Authorize.net API returns a string with BOM and totally
         // screws the JSON response being parsed. So many hours wasted!
         const txn = JSON.parse(stripBom(response.data)).transactionResponse;
@@ -76,8 +76,10 @@ router.post('/checkout_action', (req, res, next) => {
         };
 
         // insert order into DB
-        try{
-            const newDoc = await db.orders.insertOne(orderDoc);
+        db.orders.insertOne(orderDoc, (err, newDoc) => {
+            if(err){
+                console.info(err.stack);
+            }
 
             // get the new ID
             const newId = newDoc.insertedId;
@@ -127,10 +129,7 @@ router.post('/checkout_action', (req, res, next) => {
                     res.status(400).json({ err: true, orderId: newId });
                 }
             });
-        }catch(ex){
-            console.log('Error sending payment to API', ex);
-            res.status(400).json({ err: 'Your payment has declined. Please try again' });
-        }
+        });
     })
     .catch((err) => {
         console.log('Error sending payment to API', err);

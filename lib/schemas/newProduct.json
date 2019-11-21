@@ -1,5 +1,5 @@
 {
-    "$id": "newProduct",
+    "id": "/newProduct",
     "type": "object",
     "properties": {
         "productPermalink": {
@@ -9,8 +9,10 @@
             "type": "string"
         },
         "productPrice": {
-            "type": "number",
-            "format": "amount"
+            "type": "number"
+        },
+        "productDiscount": {
+            "type": ["number", 0]
         },
         "productDescription": {
             "type": "string"

@@ -90,38 +90,19 @@
             "address1" : "1 test street",
             "address2" : "testvile",
             "country" : "Netherlands",
-            "state" : "NL",
-            "postcode" : "2000TW",
-            "phone" : "123456789",
-            "password" : "$2a$10$kKjnX1J/CAdgdmLI0WuPY.ILH1c7N8mD0H/ZyUXEfee1mJxJvZIS."
-        },
-        {
-            "email" : "test1@test.com",
-            "firstName" : "Testy",
-            "lastName" : "McTesterson",
-            "address1" : "2 test street",
-            "address2" : "testvile",
-            "country" : "Netherlands",
             "state" : "",
-            "postcode" : "2000ZT",
+            "postcode" : "2000TW",
             "phone" : "123456789",
             "password" : "$2a$10$kKjnX1J/CAdgdmLI0WuPY.ILH1c7N8mD0H/ZyUXEfee1mJxJvZIS."
         }
     ],
     "users": [
         {
-            "usersName" : "Owner user",
-            "userEmail" : "owner@test.com",
+            "usersName" : "test",
+            "userEmail" : "test@test.com",
             "userPassword" : "$2a$10$7jQx/hQOWrRni531b/dHRuH8o1ZP8Yo8g..GpTOF4M7RrEH/pzTMy",
             "isAdmin" : true,
             "isOwner": true
-        },
-        {
-            "usersName" : "Non Owner",
-            "userEmail" : "nonowner@test.com",
-            "userPassword" : "$2a$10$7jQx/hQOWrRni531b/dHRuH8o1ZP8Yo8g..GpTOF4M7RrEH/pzTMy",
-            "isAdmin" : false,
-            "isOwner": false
         }
     ],
     "orders": [
