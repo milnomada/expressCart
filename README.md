@@ -1,18 +1,15 @@
 # expressCart
 
-![expressCart](https://raw.githubusercontent.com/mrvautin/expressCart/master/public/images/logo.png)
+This is a fork from [expressCart](https://github.com/mrvautin/expressCart) with few added functionalities.  
+Please visit the original project for an updated version with last development.  
 
-`expressCart` is a fully functional shopping cart built in Node.js (Express, MongoDB) with Stripe, PayPal, Authorize.net and Adyen payments.
 
-[![Github stars](https://img.shields.io/github/stars/mrvautin/expressCart.svg?style=social&label=Star)](https://github.com/mrvautin/expressCart)
+[![Github stars](https://img.shields.io/github/stars/milnomada/expressCart.svg?style=social&label=Star)](https://github.com/milnomada/expressCart)
 [![Build Status](https://travis-ci.org/mrvautin/expressCart.svg?branch=master)](https://travis-ci.org/mrvautin/expressCart)
-
-[**View the demo**](https://demo.expresscart.markmoffat.com/)
 
 ## Installation
 
-1. Create a folder to hold your installation: `mkdir expressCart`
-2. FTP/Copy the contents of the zip to your newly created folder
+1. git clone this repository `git clone https://github.com/milnomada/expressCart`
 3. Enter folder: `cd expressCart`
 4. Install dependencies: `npm install`
 5. Start application: `npm start --production`
@@ -37,12 +34,6 @@ The easiest way to get up and running is using Docker. Once the Docker CLI is in
 3. Run: `docker-compose up --build`
 4. Visit [http://127.0.0.1:1111](http://127.0.0.1:1111) in your browser
 
-### Deploy on Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/mrvautin/expressCart)
-
-> Note: When deploying to Heroku you will need to configure your external MongoDB either on your own server or a hosted service on mLab, AWS etc.
-
 ### Sample/Test data
 
 Sometimes you might want some default sample/test data. To create this, run `npm run testdata`. Remember to only run this initially or anytime you want to reset the data as this function deletes ALL existing data.
@@ -66,20 +57,6 @@ A new user form will be shown where a user can be created.
 ### Styling
 
 Adding your own custom style is done by accessing the `Admin` panel then selecting `General settings`.
-
-#### Demo images
-
-Sample homepage
-![Sample homepage](https://mrvautin.com/content/images/2018/01/expressCart-demo.jpg)
-
-Admin page
-![Admin page](https://mrvautin.com/content/images/2018/01/admin-settings.png)
-
-Popout cart
-![Popout cart](https://mrvautin.com/content/images/2018/02/popout-cart.png)
-
-Great themes
-![Great themes](https://mrvautin.com/content/images/2018/02/expresscart-mono-theme.png)
 
 ##### CSS
 
@@ -322,8 +299,7 @@ Setting of menu items is done via `/admin/settings/menu`.
 To add a new menu item to filter products, you will set the menu text using the `Menu` field and setting the keyword to filter is using the `link` field.
 
 To add a new menu item to link to a static page, you will set the menu text using the `Menu` field and set the static page URL using the `link` field. Eg:
-An `About` page would be set. Menu = 'About Us', Link = 'about`
-
+An `About` page would be set. Menu = 'About Us', Link = 'about'
 You can re-order menu items by clicking and dragging the arrows icon and placing the menu item in desired position.
 
 ## Static pages
@@ -332,16 +308,6 @@ You may want to create a static page to show contact details, about us, shipping
 
 New static pages are setup via `/admin/settings/pages`.
 
-## TODO
-
-- Add some tests...
-- Separate API and frontend
-- Modernize the frontend
-
 ## Contributing
 
-I'm looking for contributors of any kind. I'm working on turning the admin panel into something more modern and using Vue.js. The frontend part of the website will always be a normal webapp with no SPA frameworks as I believe eCommerce apps should have SEO as top priority.
-
-Contributing payment providers and themes would be much appreciated. Payment providers are added by simply adding the payment provider file to `/routes/payments/providerName.js`, then adding the route to the `app.js` file by adding `const providerName = require('./routes/payments/{providerName}');` and mounting the route `app.use('/providerName', providerName);`.
-
-If you see current code which could be enhanced (note: parts of the code is quite old but new to Github) you are welcome to submit a PR.
+See [Contributing](https://github.com/mrvautin/expressCart#contributing)
