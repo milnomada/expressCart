@@ -1,7 +1,9 @@
 node_modules/
 data/
 /config/*-local.json
-/config/settings.json
+/config/settings*
+/config/paypal.*
+/config/stripe.*
 /public/uploads
 .vscode
 **.DS_Store

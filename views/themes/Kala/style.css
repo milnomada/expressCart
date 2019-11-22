@@ -27,6 +27,9 @@ body {
 .footer ul {
    list-style: none;
 }
+.footer h4 {
+  font-weight: 300;
+}
 .foot-note {
   padding: 20px
 }
