@@ -15,26 +15,35 @@
           <div class="row cart-row">
             <div class="col-xs-4 col-md-2 col s4 m2">
               {{#if productImage}}
-              <img class="img-responsive" src="{{this.productImage}}" alt="{{this.title}} product image"> {{else}}
-              <img class="img-responsive" src="/uploads/placeholder.png" alt="{{this.title}} product image"> {{/if}}
+              <img class="img-responsive" src="{{this.productImage}}" alt="{{this.title}} product image">
+              {{else}}
+              <img class="img-responsive" src="/uploads/placeholder.png" alt="{{this.title}} product image"> 
+              {{/if}}
             </div>
             <div class="cart-item-row text-left col-xs-12 col-md-7 col s12 m7">
               <p>
                 <a class="cart-link" href="/product/{{this.link}}">{{this.title}}</a>
               </p>
-              <p>
-                &nbsp;
-                {{#each this.options}} 
-                  {{#if @last}} 
-                    {{@key}}: {{this}} 
+              {{#if this.options}}
+                <p>&nbsp;
+                  {{#each this.options}}
+                    {{#if @last}} 
+                      {{@key}}: {{this}} 
                     {{else}} 
-                    {{@key}}: {{this}} / 
-                  {{/if}} 
-                {{/each}}
-              </p>
+                      {{@key}}: {{this}} / 
+                    {{/if}}
+                  {{/each}}
+                </p>
+              {{/if}}
               <p>
                 <div class="form-group">
-                  <div class="col-lg-8 col-md-8 col l8 no-pad-left">
+                  <div class="col-lg-10 col-md-10 col l10 no-pad-left">
+                    {{#if this.uniqueProduct}}
+                      <strong><i class="fa fa-star-o"></i> {{ @root.__ "This product is a unique piece" }}</strong>
+                      <span class="pull-right">
+                        <button class="btn btn-sm btn-danger btn-delete-from-cart" data-id="{{this.productId}}" type="button"><i class="fa fa-trash" data-id="{{this.productId}}" aria-hidden="true"></i></button>
+                      </span>
+                    {{else}}
                     <div class="input-group">
                       <span class="input-group-btn">
                         <button class="btn btn-sm btn-primary btn-qty-minus" type="button">-</button>
@@ -49,6 +58,7 @@
                         <button class="btn btn-sm btn-danger btn-delete-from-cart" data-id="{{this.productId}}" type="button"><i class="fa fa-trash" data-id="{{this.productId}}" aria-hidden="true"></i></button>
                       </span>
                     </div>
+                    {{/if}}
                   </div>
                 </div>
               </p>
