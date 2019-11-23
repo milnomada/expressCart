@@ -99,7 +99,8 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         productOptions: productOptions || null,
         productComment: common.checkboxBool(req.body.productComment),
         productAddedDate: new Date(),
-        productStock: common.safeParseInt(req.body.productStock) || null
+        productStock: common.safeParseInt(req.body.productStock) || null,
+        uniqueProduct: common.convertBool(req.body.uniqueProduct)
     };
 
     // Validate the body again schema
@@ -111,7 +112,8 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
             return;
         }
 
-        console.log('schemaResult errors', schemaResult.errors);
+        // console.log('schemaResult errors', schemaResult.errors);
+        
         req.session.message = 'Form invalid. Please check values and try again.';
         req.session.messageType = 'danger';
 
@@ -125,6 +127,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         req.session.productComment = common.checkboxBool(req.body.productComment);
         req.session.productTags = req.body.productTags;
         req.session.productStock = req.body.productStock ? parseInt(req.body.productStock) : null;
+        req.session.uniqueProduct = common.checkboxBool(req.body.uniqueProduct);
 
         // redirect to insert
         res.redirect('/admin/product/new');
@@ -148,6 +151,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         req.session.productComment = common.checkboxBool(req.body.productComment);
         req.session.productTags = req.body.productTags;
         req.session.productStock = req.body.productStock ? parseInt(req.body.productStock) : null;
+        req.session.uniqueProduct = common.checkboxBool(req.body.uniqueProduct);
 
         // If API request, return json
         if(req.apiAuthenticated){
@@ -193,6 +197,7 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
         req.session.productComment = common.checkboxBool(req.body.productComment);
         req.session.productTags = req.body.productTags;
         req.session.productStock = req.body.productStock ? parseInt(req.body.productStock) : null;
+        req.session.uniqueProduct = common.checkboxBool(req.body.uniqueProduct);
 
         req.session.message = 'Error: Inserting product';
         req.session.messageType = 'danger';
@@ -316,6 +321,7 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         req.session.productOptions = req.body.productOptions;
         req.session.productComment = common.checkboxBool(req.body.productComment);
         req.session.productStock = req.body.productStock ? req.body.productStock : null;
+        req.session.uniqueProduct = common.checkboxBool(req.body.uniqueProduct);
 
         // redirect to insert
         res.redirect('/admin/product/edit/' + req.body.productId);
@@ -343,7 +349,8 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         productTags: req.body.productTags,
         productOptions: productOptions || null,
         productComment: common.checkboxBool(req.body.productComment),
-        productStock: common.safeParseInt(req.body.productStock) || null
+        productStock: common.safeParseInt(req.body.productStock) || null,
+        uniqueProduct: common.convertBool(req.body.productPublished)
     };
 
     // Validate the body again schema
@@ -368,6 +375,7 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         req.session.productComment = common.checkboxBool(req.body.productComment);
         req.session.productTags = req.body.productTags;
         req.session.productStock = req.body.productStock ? parseInt(req.body.productStock) : null;
+        req.session.uniqueProduct = common.checkboxBool(req.body.uniqueProduct);
 
         // redirect to insert
         res.redirect('/admin/product/edit/' + req.body.productId);
