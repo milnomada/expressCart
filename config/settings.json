@@ -23,7 +23,7 @@
     "paymentGateway": "paypal",
     "databaseConnectionString": "mongodb://soundclient:12ghM1Zqn4cCCeIe@musicdb-shard-00-00-xoqgo.mongodb.net:27017,musicdb-shard-00-01-xoqgo.mongodb.net:27017,musicdb-shard-00-02-xoqgo.mongodb.net:27017/kalaCart?replicaSet=musicdb-shard-0&ssl=true&authSource=admin",
     "theme": "Kala",
-    "trackStock": false,
+    "trackStock": true,
     "orderHook": "",
     "availableLanguages": [
         "en",

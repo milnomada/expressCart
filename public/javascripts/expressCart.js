@@ -727,6 +727,11 @@ $(document).ready(function (){
         if($('#productPermalink').val() === '' && $('#productTitle').val() !== ''){
             $('#productPermalink').val(slugify($('#productTitle').val()));
         }
+
+        console.log($('#uniqueProduct').attr("checked"), $('#uniqueProduct:checked'))
+        if($('#uniqueProduct:checked') > 0) {
+          $('#uniqueProduct').val(true)
+        }
     });
 
     if($('#input_notify_message').val() !== ''){
