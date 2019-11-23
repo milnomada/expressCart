@@ -31,6 +31,9 @@
         },
         "productStock": {
             "type": ["number", "null"]
+        },
+        "uniqueProduct": {
+            "type": ["boolean", false]
         }
     },
     "required": [
