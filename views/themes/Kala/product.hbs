@@ -9,6 +9,9 @@
                 {{else}}
                   <h4 class="col-md-10 product-price" data-dis="0">{{currencySymbol config.currencySymbol}}{{../result.productPrice}}</h4>
                 {{/ifCond}}
+                <div class="col-md-10 body_text">
+                    {{{productDescription}}}
+                </div>
                 {{#if productOptions}}
                     <h4 class="col-md-10 product-option">{{ @root.__ "Options" }}</h4>
                     <div class="col-md-10">
@@ -68,6 +71,8 @@
                           </span>
                       </div>
                     {{/if}}
+
+
                 </div>
                 {{#if result.productComment}}
                 <div class="col-md-10">
@@ -76,10 +81,31 @@
                 </div>
                 {{/if}}
                 <div class="col-md-10 btnAddToCart">
-                    <button class="btn btn-primary btn-block product-add-to-cart" type="button">{{ @root.__ "Add to cart" }}</button>
+                  {{#if result.productStock}}
+                    {{!-- TODO: I cound accept product stock == 0. For that fix form when product stock is 0 --}}
+                    {{#ifCond result.productStock '==' 0}}
+                      <button class="btn btn-primary btn-block product-rebuild" type="button">{{ @root.__ "Craft another like this" }}</button>
+                    {{else}}
+                      <button class="btn btn-primary btn-block product-add-to-cart" type="button">{{ @root.__ "Add to cart" }}</button>
+                    {{/ifCond}}
+                  {{else}}
+                    <button class="btn btn-primary btn-block product-rebuild" type="button">{{ @root.__ "Craft another like this" }}</button>
+                    
+                  {{/if}}
                 </div>
-                <div class="col-md-10 body_text">
-                    {{{productDescription}}}
+                <div class="col-md-10 rebuild">
+                  <div class="text-right"><span class="hide-rebuild"><small>{{ @root.__ "Close" }}</small> <i class="fa fa-close "></i></span></div>
+                  <p class="product-option-text">
+                    {{ @root.__ "You can request a new rebuild of this piece" }} <br>
+                    {{ @root.__ "It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy" }}
+                  </p>
+                  <div class="input-group">
+                    <input type="email" class="form-control" name="email" minlength="5" placeholder="Email address" required>
+                    <input type="hidden" class="form-control" name="productId" minlength="5" value="{{result._id}}">
+                    <span class="input-group-btn">
+                      <button class="btn btn-primary btn-block request-product-rebuild" type="button">{{ @root.__ "Send" }}</button>
+                    </span>
+                  </div>
                 </div>
             </div>
         </div>

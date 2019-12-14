@@ -13,14 +13,14 @@
         <div class="container-fluid">
           {{#each @root.session.cart}}
           <div class="row cart-row">
-            <div class="col-xs-4 col-md-2 col s4 m2">
+            <div class="col-md-3 no-pad-left no-pad-right">
               {{#if productImage}}
               <img class="img-responsive" src="{{this.productImage}}" alt="{{this.title}} product image">
               {{else}}
               <img class="img-responsive" src="/uploads/placeholder.png" alt="{{this.title}} product image"> 
               {{/if}}
             </div>
-            <div class="cart-item-row text-left col-xs-12 col-md-7 col s12 m7">
+            <div class="col-md-6 cart-item-row text-left">
               <p>
                 <a class="cart-link" href="/product/{{this.link}}">{{this.title}}</a>
               </p>
@@ -37,11 +37,11 @@
               {{/if}}
               <p>
                 <div class="form-group">
-                  <div class="col-lg-10 col-md-10 col l10 no-pad-left">
+                  <div class="col-md-12 no-pad-left">
                     {{#if this.uniqueProduct}}
                       <strong><i class="fa fa-star-o"></i> {{ @root.__ "This product is a unique piece" }}</strong>
                       <span class="pull-right">
-                        <button class="btn btn-sm btn-danger btn-delete-from-cart" data-id="{{this.productId}}" type="button"><i class="fa fa-trash" data-id="{{this.productId}}" aria-hidden="true"></i></button>
+                        <div class="delete-item btn-delete-from-cart" data-id="{{this.productId}}" type="button"><i class="fa fa-trash" data-id="{{this.productId}}" aria-hidden="true"></i></div>
                       </span>
                     {{else}}
                     <div class="input-group">
@@ -63,7 +63,7 @@
                 </div>
               </p>
             </div>
-            <div class="col-xs-12 col-lg-4 col s12 l4 cart-item-row text-right no-pad-right">
+            <div class="col-md-3 cart-item-row text-right no-pad-right">
               <strong>{{currencySymbol ../config.currencySymbol}}{{formatAmount this.totalItemPrice}}</strong><br>
               {{#ifCond productDiscount '>' 0}}
                 <strong class="before">-{{../productDiscount}}%</strong><br>
@@ -104,12 +104,51 @@
         </div>
       </div>
     </div>
+    {{#ifCond page '==' 'pay'}}
+    <div class="panel panel-default" style="margin-top: 30px;">
+      <div class="panel-heading">{{ @root.__ "Choose Payment" }}</div>
+      <div class="panel-body">
+        {{#if @root.session.cart}}
+        <div class="row">
+          <div class="col-md-4 no-pad-right">
+            <div class="payment-type" data-delayed="" data-id="">
+                <div class="title">Tarjeta crédito</div>
+                <div class="img-holder"><img src="/images/v_card.png" alt="Tarjeta bancaria"></div>
+            </div>
+          </div>
+          <div class="col-md-4 no-pad-right">
+            <div class="payment-type">
+                <div class="title">PayPal</div>
+                <div class="img-holder"><img src="/images/v_paypal.png" alt="PayPal"></div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 no-pad-right">
+            <div class="payment-details" data-type="card" data-id="">
+                <div class="description">Insert credit card details:</div>
+                <div class="cc-box">
+                  <input type="text" class="cc-number" name="">
+                  <input type="text" class="cc-expires" name="">
+                  <input type="text" class="cc-cvc" name="">
+                </div>
+            </div>
+            <div class="payment-details" data-type="paypal">
+                <div class="title">PayPal</div>
+                <div class="img-holder"><img src="/images/v_paypal.png" alt="PayPal"></div>
+            </div>
+          </div>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/ifCond}}
     <div class="row">
       {{#if @root.session.cart}}
+        {{#ifCond page '!=' 'pay'}}
         <div class="col-xs-6 col s6 text-left align-right">
           <button class="btn empty-cart" id="empty-cart" type="button">{{ @root.__ "Empty cart" }}</button>
         </div>
-        {{#ifCond page '!=' 'pay'}}
         <div class="text-right align-right col-xs-6 col s6">
           {{#ifCond @root.page '==' 'checkout'}}
           <a href="/pay" class="btn btn-default">{{ @root.__ "Pay now" }}</a>
@@ -118,6 +157,7 @@
           {{/ifCond}}
         </div>
         {{/ifCond}}
+        {{!-- 
         {{#ifCond page '==' 'pay'}}
           {{#if @root.session.customer}}
             {{#ifCond @root.config.paymentGateway '==' 'paypal'}}
@@ -125,6 +165,7 @@
             {{/ifCond}}
           {{/if}}
         {{/ifCond}}
+        --}}
       {{/if}}
     </div>
   </div>
