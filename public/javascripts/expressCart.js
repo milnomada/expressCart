@@ -1,11 +1,135 @@
 /* eslint-disable prefer-arrow-callback, no-var, no-tabs */
 /* globals AdyenCheckout */
 $(document).ready(function (){
+    var productId = $('.quantity').attr('data-id'),
+        imageCount = parseInt($('.quantity').attr('data-sz')),
+        pad;
+
+    console.log(productId, imageCount)
+
+    
+    /**
+     * 360 Viewer 
+     * 
+     */
+    var sliderStatus = {
+      baseIndex: 1,
+      current: "url(/uploads/" + productId + "/kala1-2-360-01.jpg)",
+    }
+
+    for(var i = 1; i < imageCount + 1; i++) {
+      $('.thumbnail-image-container').append('<div class="over over-' + i + '"></div>')
+    }
+    setTimeout(function(){
+      for(var i = 1; i < imageCount + 1; i++) {
+        if(i < 10)
+          pad = "0" + i
+        else
+          pad = i
+        $('.over-' + i).css({"background-image": "url(/uploads/" + productId + "/kala1-2-360-" + pad + ".jpg?v=" + i + ")"})
+      }
+    }, 133)
+
+    console.log(sliderStatus.current)
+    $('.thumbnail-image-container').css({"background-image": sliderStatus.current})
+
+    var build360 = function(imageCount, sliderStatus) {
+      var w = $('body').width(),
+          radiux;
+
+      if(w >= 1920) {
+        radiux = 100
+      } else if(w >= 1440) {
+        radiux = 75
+      } else if(w >= 1200) {
+        radiux = 70
+      } else if(w >= 900) {
+        radiux = 65
+      } else {
+        radiux = 65
+      }
+      // position the slider in the center, biased by radiux
+      $("#slider").css({left: 'calc(50% - ' + radiux + 'px'});
+      $("#slider").roundSlider({
+        editableTooltip: false,
+        showTooltip: false,
+        min: 1,
+        max: 100,
+        startAngle: 270,
+        width: 2,
+        radius: radiux,
+        handleSize: 20,
+        create: function(){
+          // if(!$('.rs-container').find('.rs-tooltip-text')) {
+          $('.rs-container').append('<span class="rs-tooltip rs-tooltip-text" style="margin-top: -10px; margin-left: -5.13281px;">0&deg;</span>')
+          //}
+        },
+        change: function (e) {
+          // 28 - 100
+          // x  -  v
+          x = (imageCount * e.value) / 100
+          // $('.thumbnail-image-container').css({"background-image": "url(/uploads/5dd5f4f672d9f772f54b5c03/kala1-2-360-" + parseInt(x) + ".jpg?v=" + e.value + ")"})
+          console.log(e.value);
+        },
+        drag: function (e) {
+          var x = (imageCount * e.value) / 100,
+              w,
+              deg = parseInt((360 * e.value) / 100);
+
+          console.log(parseInt(x));
+          // update only if the relative radial offset changed the picture
+          if(parseInt(x) > 0 && parseInt(x) !== sliderStatus.currentIndex) {
+            sliderStatus.currentIndex = parseInt(x)
+            if(sliderStatus.currentIndex === imageCount) {
+              deg = 0
+            }
+            $('.over-' + sliderStatus.currentIndex).show()
+            $('.over:not(.over-' + sliderStatus.currentIndex + ")").hide()
+            $('.thumbnail-image-container').css({"background-image": "none"}) // disable background
+          } else if(parseInt(x) === 0) {
+            $('.over-1').show()
+            $('.over:not(.over-1)').hide()
+          }
+
+          // always update degrees
+          $('.rs-tooltip-text').html(deg + "&deg;");
+          w = $('.rs-tooltip-text').width()
+          $('.rs-tooltip-text').css({'margin-left': - (w/2) + 'px'});
+        }
+      });
+    }
+
+    build360(imageCount, sliderStatus)
+    /*$('#slider').css({
+      top: "-" + ((70 * ((100 * w) / (1920))) / 100) + "px",
+      left: "calc(50% - " + ((100 * w) / (1920)) + "px)"
+    })*/
+    var lastScrollTop = 0, active = false;
+    $(window).on('scroll', function(event) {
+      if(active)
+        return
+      active = true
+      var st = $(this).scrollTop();
+      if (st > lastScrollTop) {
+        $('html, body').animate({
+            scrollTop: $('.footer').offset().top
+        }, {duration: 200, easing: 'linear', done: function(){ active = false}});
+      } else {
+        $('html, body').animate({
+            scrollTop: $('body').offset().top
+        }, {duration: 200, easing: 'linear', done: function(){ active = false}});
+      }
+      lastScrollTop = st;
+    });
+    
+    $(window).on('resize', function(){
+      build360(imageCount, sliderStatus)
+    })
+
     // setup if material theme
     if($('#cartTheme').val() === 'Material'){
         $('.materialboxed').materialbox();
     }
-
     if($(window).width() < 768){
         $('.menu-side').on('click', function(e){
             e.preventDefault();
@@ -27,7 +151,9 @@ $(document).ready(function (){
     $('.shipping-form input').each(function(e){
         $(this).wrap('<fieldset></fieldset>');
         var tag = $(this).attr('placeholder');
-        $(this).after('<label for="name" class="hidden">' + tag + '</label>');
+        var name = $(this).attr('name');
+        console.log(name)
+        $(this).after('<label for="' + name + '" class="hidden">' + tag + '</label>');
     });
 
     $('.shipping-form input').on('focus', function(){
@@ -55,8 +181,8 @@ $(document).ready(function (){
         $.ajax({
             method: 'POST',
             url: '/admin/testEmail'
-		})
-		.done(function(msg){
+		    })
+		    .done(function(msg){
             showNotification(msg, 'success');
         })
         .fail(function(msg){
@@ -87,8 +213,8 @@ $(document).ready(function (){
             fixedGutter: false
         });
     }
-
-    if($('#customCss').length){
+    // disable custom css
+    /* if($('#customCss').length){
         var customCss = window.CodeMirror.fromTextArea(document.getElementById('customCss'), {
             mode: 'text/css',
             tabMode: 'indent',
@@ -101,9 +227,9 @@ $(document).ready(function (){
             autosemicolon: true
         });
         customCss.setValue(customCssBeautified);
-    }
+    } */
 
-	// add the table class to all tables
+	  // add the table class to all tables
     $('table').each(function(){
         $(this).addClass('table table-hover');
     });
@@ -127,7 +253,7 @@ $(document).ready(function (){
             url: '/admin/product/published_state',
             data: { id: this.id, state: this.checked }
         })
-		.done(function(msg){
+		    .done(function(msg){
             showNotification(msg.message, 'success');
         })
         .fail(function(msg){
@@ -160,32 +286,41 @@ $(document).ready(function (){
         window.location = '/admin/orders/bystatus/' + $('#orderStatusFilter').val();
     });
 
+    /**
+     * Callback for page.
+     * See:
+     * https://botmonster.com/jquery-bootpag/#example-advanced
+     */
+    const onPageCallback = function(e, n) {
+      console.log(e, n);
+    }
+
     if($('#pager').length){
-        var pageNum = $('#pageNum').val();
-        var pageLen = $('#productsPerPage').val();
-        var productCount = $('#totalProductCount').val();
-        var paginateUrl = $('#paginateUrl').val();
-        var searchTerm = $('#searchTerm').val();
+      var pageNum = $('#pageNum').val();
+      var pageLen = $('#productsPerPage').val();
+      var productCount = $('#totalProductCount').val();
+      var paginateUrl = $('#paginateUrl').val();
+      var searchTerm = $('#searchTerm').val();
 
-        if(searchTerm !== ''){
-            searchTerm = searchTerm + '/';
-        }
+      if(searchTerm !== ''){
+        searchTerm = searchTerm + '/';
+      }
 
-        var pagerHref = '/' + paginateUrl + '/' + searchTerm + '{{number}}';
-        var totalProducts = Math.ceil(productCount / pageLen);
+      var pagerHref = '/' + paginateUrl + '/' + searchTerm + '{{number}}';
+      var totalProducts = Math.ceil(productCount / pageLen);
 
-        if(parseInt(productCount) > parseInt(pageLen)){
-            $('#pager').bootpag({
-                total: totalProducts,
-                page: pageNum,
-                maxVisible: 5,
-                href: pagerHref,
-                wrapClass: 'pagination',
-                prevClass: 'waves-effect',
-                nextClass: 'waves-effect',
-                activeClass: 'pag-active waves-effect'
-            });
-        }
+      /* if(parseInt(productCount) > parseInt(pageLen)){
+        $('#pager').bootpag({
+          total: totalProducts,
+          page: pageNum,
+          maxVisible: 5,
+          href: pagerHref,
+          wrapClass: 'pagination',
+          prevClass: 'waves-effect',
+          nextClass: 'waves-effect',
+          activeClass: 'pag-active waves-effect'
+        }).on('page', onPageCallback)
+      } */
     }
 
     $(document).on('click', '#btnPageUpdate', function(e){
@@ -214,8 +349,8 @@ $(document).ready(function (){
         $.ajax({
             method: 'POST',
             url: '/admin/createApiKey'
-		})
-		.done(function(msg){
+		    })
+		    .done(function(msg){
             $('#apiKey').val(msg.apiKey);
             showNotification(msg.message, 'success', true);
         })
@@ -377,9 +512,9 @@ $(document).ready(function (){
         if(!e.isDefaultPrevented()){
             e.preventDefault();
             // set hidden elements from codemirror editors
-            $('#footerHtml_input').val($('.CodeMirror')[0].CodeMirror.getValue());
-            $('#googleAnalytics_input').val($('.CodeMirror')[1].CodeMirror.getValue());
-            $('#customCss_input').val($('.CodeMirror')[2].CodeMirror.getValue());
+            // $('#footerHtml_input').val($('.CodeMirror')[0].CodeMirror.getValue());
+            // $('#googleAnalytics_input').val($('.CodeMirror')[1].CodeMirror.getValue());
+            // $('#customCss_input').val($('.CodeMirror')[2].CodeMirror.getValue());
             $.ajax({
                 method: 'POST',
                 url: '/admin/settings/update',
@@ -536,7 +671,7 @@ $(document).ready(function (){
             url: '/admin/order/statusupdate',
             data: { order_id: $('#order_id').val(), status: $('#orderStatus').val() }
         })
-		.done(function(msg){
+		    .done(function(msg){
             showNotification(msg.message, 'success', true);
         })
         .fail(function(msg){
@@ -558,10 +693,47 @@ $(document).ready(function (){
                 productId: $('#productId').val(),
                 productQuantity: $('#product_quantity').val(),
                 productOptions: JSON.stringify(productOptions),
-                productComment: $('#product_comment').val()
+                productComment: "" // $('#product_comment').val()
             }
         })
-		.done(function(msg){
+		    .done(function(msg){
+            $('#cart-count').text(msg.totalCartItems);
+            updateCartDiv();
+            showNotification(msg.message, 'success');
+        })
+        .fail(function(msg){
+            showNotification(msg.responseJSON.message, 'danger');
+        });
+    });
+
+    $(document).on('click', '.product-rebuild', function(e){
+      $('.description').slideUp()
+      $('.rebuild').slideDown()
+    });
+
+    $(document).on('click', '.hide-rebuild', function(e){
+      $('.description').slideDown()
+      $('.rebuild').slideUp()
+    });
+
+    $(document).on('click', '.request-product-rebuild', function(e){
+        var productOptions = getSelectedOptions();
+
+        if(parseInt($('#product_quantity').val()) < 0){
+            $('#product_quantity').val(0);
+        }
+
+        $.ajax({
+            method: 'POST',
+            url: '/product/rebuild',
+            headers: {apikey: '5dd981df214b6316f134c11d'},
+            data: {
+                productId: $('input[name=productId]').val(),
+                units: 1, // $('#product_quantity').val(),
+                email: $('input[name=email]').val()
+            }
+        })
+        .done(function(msg){
             $('#cart-count').text(msg.totalCartItems);
             updateCartDiv();
             showNotification(msg.message, 'success');
@@ -611,12 +783,20 @@ $(document).ready(function (){
             method: 'POST',
             url: '/product/emptycart'
         })
-		.done(function(msg){
+		    .done(function(msg){
             $('#cart-count').text(msg.totalCartItems);
             updateCartDiv();
             showNotification(msg.message, 'success', true);
         });
     });
+
+    // Compute quantity here
+    var stock = parseInt($('.quantity').attr('data-q')),
+        requested = parseInt($('#product_quantity').val())
+        ;
+
+    if(stock === requested)
+      $('.qty-btn-plus').hide()
 
     $('.qty-btn-minus').on('click', function(){
         var number = parseInt($('#product_quantity').val()) - 1;
@@ -624,7 +804,17 @@ $(document).ready(function (){
     });
 
     $('.qty-btn-plus').on('click', function(){
+      requested = parseInt($('#product_quantity').val())
+      if(stock > requested) {
         $('#product_quantity').val(parseInt($('#product_quantity').val()) + 1);
+        requested = parseInt($('#product_quantity').val())
+        if(stock === requested)
+          $('.qty-btn-plus').hide()
+      }
+      else {
+        if(stock === requested)
+          $('.qty-btn-plus').hide()
+      }
     });
 
     // product thumbnail image click
@@ -638,7 +828,7 @@ $(document).ready(function (){
             url: '/admin/product/setasmainimage',
             data: { product_id: $('#productId').val(), productImage: $(this).attr('data-id') }
         })
-		.done(function(msg){
+		    .done(function(msg){
             showNotification(msg.message, 'success', true);
         })
         .fail(function(msg){
@@ -652,7 +842,7 @@ $(document).ready(function (){
             url: '/admin/product/deleteimage',
             data: { product_id: $('#productId').val(), productImage: $(this).attr('data-id') }
         })
-		.done(function(msg){
+		    .done(function(msg){
             showNotification(msg.message, 'success', true);
         })
         .fail(function(msg){
@@ -660,7 +850,7 @@ $(document).ready(function (){
         });
     });
 
-	// Call to API to check if a permalink is available
+	   // Call to API to check if a permalink is available
     $(document).on('click', '#validate_permalink', function(e){
         if($('#productPermalink').val() !== ''){
             $.ajax({
@@ -735,17 +925,22 @@ $(document).ready(function (){
     });
 
     if($('#input_notify_message').val() !== ''){
-		// save values from inputs
+		    // save values from inputs
         var messageVal = $('#input_notify_message').val();
         var messageTypeVal = $('#input_notify_messageType').val();
 
-		// clear inputs
+		    // clear inputs
         $('#input_notify_message').val('');
         $('#input_notify_messageType').val('');
 
-		// alert
+		    // alert
         showNotification(messageVal, messageTypeVal, false);
     }
+
+    $('input.cc-number').payment('formatCardNumber');
+    $('input.cc-expires').payment('formatCardExpiry');
+    $('input.cc-cvc').payment('formatCardCVC');
+    
 });
 
 function deleteFromCart(element){
@@ -859,6 +1054,8 @@ function getSelectedOptions(){
     });
     return options;
 }
+
+
 
 // show notification popup
 function showNotification(msg, type, reloadPage){
