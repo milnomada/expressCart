@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const colors = require('colors');
+const { checkLogin } = require('../lib/auth');
+const { validateJson } = require('../lib/schema');
 const async = require('async');
+const crypto = require('crypto')
 const _ = require('lodash');
 const {
     getId,
     hooker,
     showCartCloseBtn,
+    sendEmail,
     clearSessionValue,
     sortMenu,
     getMenu,
@@ -17,6 +21,8 @@ const {
     getData,
     addSitemapProducts
 } = require('../lib/common');
+
+const common = require('../lib/common');
 
 // These is the customer facing routes
 router.get('/payment/:orderId', async (req, res, next) => {
@@ -143,6 +149,37 @@ router.get('/cartPartial', (req, res) => {
         config: req.app.config,
         session: req.session
     });
+});
+
+// test
+router.post('/product/sendme', (req, res, next) => {
+  console.log(req.body)
+
+  const db = req.app.db;
+
+  db.products.findOne({ _id: getId(req.body.productId) }, function(err, data){
+    if(!data || err){
+      res.json({status: 'error', message: 'Product not found'});
+      return;
+    }
+    if(data.productPublished === false){
+      res.json({status: 'error', message: 'Product not found'});
+      return;
+    }
+    const emailHtml = common.getRebuildTemplate(
+      "articles", { 
+        message: "You just ordered a rebuild of the following product",
+        items: [data],
+        hash: "hash-here"
+      }
+    )
+    common.sendEmail(
+      "milnomada@gmail.com",
+      'Your payment with ' + req.app.config.cartTitle,
+      emailHtml
+    );
+    res.status(200).json({})
+  });
 });
 
 // show an individual product
@@ -290,6 +327,150 @@ router.post('/product/emptycart', async (req, res, next) => {
     emptyCart(req, res, 'json');
 });
 
+// Craft another like this feature
+router.post('/product/rebuild', checkLogin, async (req, res, next) => {
+
+  if(!req.apiAuthenticated) {
+    res.status(401).json({error: "Unauthorized"});
+    return
+  }
+
+  var productId = req.body.productId,
+    email = req.body.email,
+    db = req.app.db,
+    buffer = crypto.randomBytes(48)
+    ;
+
+  const doc = {
+    productId: req.body.productId,
+    customerEmail: email,
+    units: 1,   // TODO: get this value from the rebuild form
+    signature: buffer.toString('hex'),
+    created: new Date(),
+    status: 0
+  };
+
+  // Validate the body again schema
+  const schemaResult = validateJson('newRebuild', doc);
+  if(!schemaResult.valid)
+    // If API request, return json
+    res.status(400).json(schemaResult.errors);
+  else {
+    try {
+      const saved = await db.rebuilds.insertOne(doc);
+      const product = await db.products.findOne({ _id: getId(req.body.productId) })
+      // get the new ID
+      const newId = saved.insertedId;
+      
+      // Render email
+      const emailHtml = common.getRebuildTemplate(
+        "articles", { 
+          message: "You just ordered a rebuild of the following product",
+          items: [product],
+          hash: doc.signature
+        }
+      )
+      common.sendEmail(
+        "milnomada@gmail.com",
+        'Your rebuild request from ' + req.app.config.cartTitle,
+        emailHtml
+      );
+
+      res.status(201).json({status: 'ok', message: 'email sent'});
+      // Send email to admin (explain reprint) let's see
+
+    } catch(e){
+      console.log(colors.red('Error inserting document: ' + e));
+      res.status(400).json({error: 'Error inserting document'});
+    }
+  }
+});
+
+// Craft another like this feature
+router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
+
+  var productId = req.body.productId,
+    email = req.body.email,
+    db = req.app.db,
+    buffer = crypto.randomBytes(48)
+    ;
+
+  const doc = {
+    signature: req.params.hash
+  }
+
+  // Set Status Confirmed
+  const rebuild = await db.rebuilds.findOne(doc) // {$set: {status: 1}}, (err, rebuild) => {
+
+  if(!rebuild) {
+    console.log(colors.yellow("No rebuild found", err, rebuild))
+    res.redirect('/');
+    return
+  }
+
+
+
+  // load product into session,
+  req.session.cart = []
+  // Doesnt exist so we add to the cart session
+  req.session.cartTotalItems = rebuild.units;
+
+  // this is not mongoose!
+  const product = await db.products.findOne({ _id: getId(rebuild.productId)} )
+  if(!product) {
+    console.log(colors.yellow("No product found", err, rebuild, product, getId(rebuild.productId)))
+    res.redirect('/');
+    return
+  }
+  
+  // confirm rebuild
+  await db.rebuilds.updateOne({signature: rebuild.signature}, {$set: {status: 1}}, {upsert: true})
+
+  // new product into session cart
+  const productObj = {};
+  productObj.productId = rebuild.productId;
+  productObj.title = product.productTitle;
+  productObj.quantity = rebuild.units;
+  productObj.uniqueProduct = product.uniqueProduct;
+  if(product.productDiscount && product.productDiscount > 0)
+    productObj.totalItemPrice = (product.productPrice - (product.productPrice / product.productDiscount)) * rebuild.units;
+  else
+    productObj.totalItemPrice = product.productPrice * rebuild.units;
+
+  productObj.options = product.productOptions;
+  productObj.productImage = product.productImage;
+  productObj.productDiscount = product.productDiscount;
+  productObj.productComment = product.productComment;
+  productObj.productSubscription = product.productSubscription;
+  if(product.productPermalink){
+      productObj.link = product.productPermalink;
+  }else{
+      productObj.link = product._id;
+  }
+
+  // merge into the current cart
+  req.session.cart.push(productObj);
+
+  // Update cart to the DB
+  await db.cart.updateOne(
+    { sessionId: req.session.id }, 
+    { $set: { cart: req.session.cart }},
+    { upsert: true }
+  );
+
+  // update total cart amount
+  updateTotalCartAmount(req, res);
+
+  // update how many products in the shopping cart
+  req.session.cartTotalItems = req.session.cart.reduce((a, b) => +a + +b.quantity, 0);
+
+  // reset user session
+  req.session.user = null
+
+  // redirect to pay
+  res.redirect('/pay');
+});
+
 const emptyCart = async (req, res, type) => {
     const db = req.app.db;
 
@@ -419,7 +600,7 @@ router.post('/product/addtocart', async (req, res, next) => {
         // Set the card quantity
         cartQuantity = productQuantity;
 
-        // new product deets
+        // new product details
         const productObj = {};
         productObj.productId = req.body.productId;
         productObj.title = product.productTitle;
@@ -431,9 +612,9 @@ router.post('/product/addtocart', async (req, res, next) => {
         productObj.productDiscount = product.productDiscount
         productObj.productComment = productComment;
         productObj.productSubscription = product.productSubscription;
-        if(product.productPermalink){
+        if(product.productPermalink) {
             productObj.link = product.productPermalink;
-        }else{
+        } else{
             productObj.link = product._id;
         }
 
@@ -626,10 +807,12 @@ router.get('/page/:pageNum', (req, res, next) => {
                 res.status(200).json(results.data);
                 return;
             }
-
-            res.render(`${config.themeViews}index`, {
+            Promise.all([getImages(results.data[0]._id, req, res)]).then(([images])=>{
+              console.log(images.length)
+              res.render(`${config.themeViews}index`, {
                 title: 'Shop',
                 results: results.data,
+                images: images,
                 session: req.session,
                 message: clearSessionValue(req.session, 'message'),
                 messageType: clearSessionValue(req.session, 'messageType'),
@@ -643,6 +826,7 @@ router.get('/page/:pageNum', (req, res, next) => {
                 helpers: req.handlebars.helpers,
                 showFooter: 'showFooter',
                 menu: sortMenu(menu)
+              });
             });
         })
         .catch((err) => {
@@ -650,53 +834,78 @@ router.get('/page/:pageNum', (req, res, next) => {
         });
 });
 
+// The custom about page
+router.get('/about', async (req, res, next) => {
+  const db = req.app.db;
+  const config = req.app.config;
+
+  res.render(`${config.themeViews}about`, {
+      title: "About",
+      session: req.session,
+      message: clearSessionValue(req.session, 'message'),
+      messageType: clearSessionValue(req.session, 'messageType'),
+      pageCloseBtn: showCartCloseBtn('page'),
+      config: req.app.config,
+      metaDescription: "Meta description",
+      helpers: req.handlebars.helpers,
+      showFooter: 'showFooter',
+      menu: sortMenu(await getMenu(db))
+  });
+});
+
 // The main entry point of the shop
 router.get('/:page?', async (req, res, next) => {
     const db = req.app.db;
     const config = req.app.config;
     const numberProducts = config.productsPerPage ? config.productsPerPage : 6;
-
+    console.log("page", req.params.page)
     // if no page is specified, just render page 1 of the cart
     if(!req.params.page){
         Promise.all([
             getData(req, 1, {}),
             getMenu(db)
         ])
-            .then(([results, menu]) => {
-                // If JSON query param return json instead
-                if(req.query.json === 'true'){
-                    res.status(200).json(results.data);
-                    return;
-                }
-
-                res.render(`${config.themeViews}index`, {
-                    title: `${config.cartTitle} - Shop`,
-                    theme: config.theme,
-                    results: results.data,
-                    session: req.session,
-                    message: clearSessionValue(req.session, 'message'),
-                    messageType: clearSessionValue(req.session, 'messageType'),
-                    pageCloseBtn: showCartCloseBtn('page'),
-                    config,
-                    productsPerPage: numberProducts,
-                    totalProductCount: results.totalProducts,
-                    pageNum: 1,
-                    paginateUrl: 'page',
-                    helpers: req.handlebars.helpers,
-                    showFooter: 'showFooter',
-                    menu: sortMenu(menu)
-                });
+        .then(([results, menu]) => {
+            // If JSON query param return json instead
+            if(req.query.json === 'true'){
+                res.status(200).json(results.data);
+                return;
+            }
+            console.log(results.data[0])
+            // for(var i = 0; i< results.data.length; i++) {
+            Promise.all([getImages(results.data[0]._id, req, res)]).then(([images])=>{
+              console.log(images)
+              res.render(`${config.themeViews}index`, {
+                title: `${config.cartTitle} - Shop`,
+                theme: config.theme,
+                results: results.data,
+                images: images,
+                session: req.session,
+                message: clearSessionValue(req.session, 'message'),
+                messageType: clearSessionValue(req.session, 'messageType'),
+                pageCloseBtn: showCartCloseBtn('page'),
+                config,
+                productsPerPage: numberProducts,
+                totalProductCount: results.totalProducts,
+                pageNum: 1,
+                paginateUrl: 'page',
+                helpers: req.handlebars.helpers,
+                showFooter: 'showFooter',
+                menu: sortMenu(menu)
+              });
             })
-            .catch((err) => {
-                console.error(colors.red('Error getting products for page', err));
-            });
+            // }
+        })
+        .catch((err) => {
+            console.error(colors.red('Error getting products for page', err));
+        });
     }else{
         if(req.params.page === 'admin'){
             next();
             return;
         }
         // lets look for a page
-        const page = db.pages.findOne({ pageSlug: req.params.page, pageEnabled: 'true' });
+        const page = await db.pages.findOne({ pageSlug: req.params.page, pageEnabled: 'true' });
         // if we have a page lets render it, else throw 404
         if(page){
             res.render(`${config.themeViews}page`, {
