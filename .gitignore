@@ -7,3 +7,4 @@ config/settings*
 /public/uploads
 .vscode
 **.DS_Store
+compress
