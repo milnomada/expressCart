@@ -792,7 +792,7 @@ router.get('/sitemap.xml', (req, res, next) => {
     });
 });
 
-router.get('/page/:pageNum', (req, res, next) => {
+router.get(['/page/:pageNum', '/lamp/:pageNum'], (req, res, next) => {
     const db = req.app.db;
     const config = req.app.config;
     const numberProducts = config.productsPerPage ? config.productsPerPage : 6;
@@ -802,8 +802,13 @@ router.get('/page/:pageNum', (req, res, next) => {
         getMenu(db)
     ])
         .then(([results, menu]) => {
+            console.log(results)
             // If JSON query param return json instead
             if(req.query.json === 'true'){
+                res.status(200).json(results.data);
+                return;
+            }
+            if(results.data.length === 0){
                 res.status(200).json(results.data);
                 return;
             }

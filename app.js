@@ -149,6 +149,18 @@ handlebars = handlebars.create({
             }
             return'0.00';
         },
+        times: (n, block) => {
+            var accum = '';
+            for(var i = 0; i < n; ++i) {
+                accum += block.fn(i);
+                block.data.index = i;
+                block.data.number = i + 1;
+            }
+            return accum;
+        },
+        sum: (a, b) => {
+            return a + b;
+        },
         amountNoDecimal: (amt) => {
             if(amt){
                 return handlebars.helpers.formatAmount(amt).replace('.', '');

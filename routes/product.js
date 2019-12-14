@@ -61,6 +61,7 @@ router.get('/admin/product/new', restrict, checkAccess, (req, res) => {
     res.render('product_new', {
         title: 'New product',
         session: req.session,
+        uniqueProduct: common.clearSessionValue(req.session, 'uniqueProduct'),
         productTitle: common.clearSessionValue(req.session, 'productTitle'),
         productDescription: common.clearSessionValue(req.session, 'productDescription'),
         productPrice: common.clearSessionValue(req.session, 'productPrice'),
@@ -216,9 +217,9 @@ router.post('/admin/product/insert', restrict, checkAccess, async (req, res) => 
 // render the editor
 router.get('/admin/product/edit/:id', restrict, checkAccess, async (req, res) => {
     const db = req.app.db;
-
     const images = await common.getImages(req.params.id, req, res);
-    const product = await db.products.findOne({ _id: common.getId(req.params.id) });
+    const product = await db.products.findOne({ _id: common.getId(req.params.id)});
+
     if(!product){
         // If API request, return json
         if(req.apiAuthenticated){
@@ -320,14 +321,16 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         req.session.productTags = req.body.productTags;
         req.session.productOptions = req.body.productOptions;
         req.session.productComment = common.checkboxBool(req.body.productComment);
-        req.session.productStock = req.body.productStock ? req.body.productStock : null;
+        req.session.productStock = req.body.productStock ? req.body.productStock : 0;
         req.session.uniqueProduct = common.checkboxBool(req.body.uniqueProduct);
-
+        console.log(req.session)
         // redirect to insert
         res.redirect('/admin/product/edit/' + req.body.productId);
         return;
     }
+
     const images = await common.getImages(req.body.productId, req, res);
+
     // Process supplied options
     let productOptions = req.body.productOptions;
     if(productOptions && typeof productOptions !== 'object'){
@@ -337,7 +340,7 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
             console.log('Failure to parse options');
         }
     }
-
+    console.log(req.body)
     const productDoc = {
         productId: req.body.productId,
         productPermalink: req.body.productPermalink,
@@ -349,8 +352,8 @@ router.post('/admin/product/update', restrict, checkAccess, async (req, res) => 
         productTags: req.body.productTags,
         productOptions: productOptions || null,
         productComment: common.checkboxBool(req.body.productComment),
-        productStock: common.safeParseInt(req.body.productStock) || null,
-        uniqueProduct: common.convertBool(req.body.productPublished)
+        productStock: common.safeParseInt(req.body.productStock) || 0,
+        uniqueProduct: common.convertBool(req.body.uniqueProduct)
     };
 
     // Validate the body again schema
