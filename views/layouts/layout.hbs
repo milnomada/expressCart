@@ -28,24 +28,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Wire+One|IBM+Plex+Sans+Condensed:300,400&display=swap" >
     <link rel="stylesheet" href="/stylesheets/codemirror-style.min.css">
     <link rel="stylesheet" href="/stylesheets/style{{config.env}}.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.2/roundslider.min.css" />
     {{#if admin}}
     <link rel="stylesheet" href="/stylesheets/admin{{config.env}}.css">
     {{/if}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/css/css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
-    <script src="/javascripts/jquery.bootpag.min.js"></script>
-    <script src="/javascripts/cssbeautify.min.js"></script>
-    {{#unless admin}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-    {{/unless}}
-    <script src="/javascripts/expressCart{{config.env}}.js"></script>
-    <script src="/javascripts/jquery.dotdotdot.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tokenfield/0.12.0/bootstrap-tokenfield.min.js"></script>
+    
     <!-- SEO data -->
     <link rel="canonical" href="{{config.baseUrl}}" />
     <meta name="referrer" content="origin" />
@@ -57,12 +44,12 @@
     <meta name="twitter:title" content="{{title}}" />
     <meta name="twitter:url" content="{{config.baseUrl}}" />
     <script type="application/ld+json">
-        {
-            "@context": "http://schema.org",
-            "@type": "WebSite",
-            "publisher": "{{config.cartTitle}}",
-            "url": "{{config.baseUrl}}"
-        }
+      {
+        "@context": "http://schema.org",
+        "@type": "WebSite",
+        "publisher": "{{config.cartTitle}}",
+        "url": "{{config.baseUrl}}"
+      }
     </script>
     {{#if config.googleAnalytics}}{{{config.googleAnalytics}}}{{/if}}
     {{#if config.customCss}}<style>{{{config.customCss}}}</style>{{/if}}
@@ -73,14 +60,14 @@
     {{/if}}
     <!-- SEO data -->
 	</head>
-    {{#if admin}}
-	<body class="admin">
-    {{else}}
-    <body>
-    {{/if}}
+  {{#if admin}}
+  <body class="admin">
+  {{else}}
+  <body>
+  {{/if}}
 		<!-- Static navbar -->
-	    <nav class="navbar navbar-default navbar-static-top">
-			<div class="container-fluid mainNavBar">
+    <nav class="navbar navbar-default navbar-static-top">
+		  <div class="container-fluid mainNavBar">
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed offcanvas-trigger" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
@@ -102,7 +89,7 @@
               {{/isNull}}
           {{/if}}
           <div class="sub-navbar-header">
-            <span class="bigger">{{ @root.__ "Light sources" }}</span>
+            <span class="bigger">{{ @root.__ "Illumination" }}</span>
             <span>{{ @root.__ "Handmade" }}</span>
           </div>
 				</div>
@@ -134,36 +121,36 @@
             {{/unless}}
           </ul>
 				</div>
+      </div>
+    </nav>
+    <div class="site-overlay"></div>
+      {{#unless admin}}
+        {{#ifCond page '!=' 'checkout'}}
+        {{#ifCond page '!=' 'pay'}}
+          <div id="cart" class="col-md-12 pushy pushy-right">
+            {{> (getTheme 'cart')}}
+          </div>
+        {{/ifCond}}
+        {{/ifCond}}
+      {{/unless}}
+	    <div class="container-fluid content-body" id="container">
+        <div class="row">
+          {{#if admin}}
+          <div class="col-xs-12 col s12">
+            {{{body}}}
+          </div>
+          {{else}}
+          {{{body}}}
+          {{/if}}
         </div>
-	    </nav>
-        <div class="site-overlay"></div>
-        {{#unless admin}}
-            {{#ifCond page '!=' 'checkout'}}
-            {{#ifCond page '!=' 'pay'}}
-                <div id="cart" class="col-md-12 pushy pushy-right">
-                    {{> (getTheme 'cart')}}
-                </div>
-            {{/ifCond}}
-            {{/ifCond}}
-        {{/unless}}
-		<div class="container-fluid content-body" id="container">
-            <div class="row">
-                {{#if admin}}
-                <div class="col-xs-12 col s12">
-                    {{{body}}}
-                </div>
-                {{else}}
-                {{{body}}}
-                {{/if}}
-            </div>
-		</div>
+	  </div>
 		<input type="hidden" id="input_notify_message" value="{{message}}">
 		<input type="hidden" id="input_notify_messageType" value="{{messageType}}">
     <input type="hidden" id="cartCheckout" value="{{checkout}}">
     <input type="hidden" id="cartTheme" value="{{@root.config.theme}}">
 		<div id="notify_message"></div>
 		{{#if showFooter}}
-      <footer class="footer">
+      <footer class="footer v2">
         <div class="container-fluid">
           {{#isNull @root.config.footerHtml}}
             {{> themes/Kala/footer}}
@@ -173,6 +160,23 @@
         </div>
       </footer>
 		{{/if}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.20.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+    <script src="/javascripts/jquery.bootpag.min.js"></script>
+    <script src="/javascripts/cssbeautify.min.js"></script>
+    {{#unless admin}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    {{/unless}}
+    <script src="/javascripts/expressCart{{config.env}}.js"></script>
+    <script src="/javascripts/jquery.dotdotdot.min.js"></script>
+    <script src="/javascripts/jquery.payment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tokenfield/0.12.0/bootstrap-tokenfield.min.js"></script>
     <script src="/javascripts/pushy.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.2/roundslider.min.js"></script>
 	</body>
 </html>
