@@ -69,6 +69,7 @@ const admin = require('./routes/admin');
 const product = require('./routes/product');
 const customer = require('./routes/customer');
 const order = require('./routes/order');
+const rebuild = require('./routes/rebuild');
 const user = require('./routes/user');
 const paypal = require('./routes/payments/paypal');
 const stripe = require('./routes/payments/stripe');
@@ -153,6 +154,22 @@ handlebars = handlebars.create({
                 return handlebars.helpers.formatAmount(amt).replace('.', '');
             }
             return handlebars.helpers.formatAmount(amt);
+        },
+         getStatusRebuild: (status) => {
+            switch(status){
+                case 0:
+                  return 'created'
+                case 1:
+                  return 'confirmed'
+                case 2: 
+                  return 'paid'
+                case 3:
+                  return 'started'
+                case 4:
+                  return 'sent'
+                case 5:
+                  return 'cancellec'
+            }
         },
         getStatusColor: (status) => {
             switch(status){
@@ -336,6 +353,7 @@ app.use('/', index);
 app.use('/', customer);
 app.use('/', product);
 app.use('/', order);
+app.use('/', rebuild);
 app.use('/', user);
 app.use('/', admin);
 app.use('/paypal', paypal);

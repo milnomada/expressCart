@@ -129,7 +129,7 @@ router.post('/checkout_action', async (req, res, next) => {
 
             // send the email with the response
             // TODO: Should fix this to properly handle result
-            common.sendEmail(req.session.paymentEmailAddr, 'Your payment with ' + config.cartTitle, common.getEmailTemplate(paymentResults));
+            common.sendEmail(req.session.paymentEmailAddr, 'Your payment with ' + config.cartTitle, common.renderPaymentEmail(paymentResults));
         }
         res.status(200).json({ paymentId: newId });
     });
