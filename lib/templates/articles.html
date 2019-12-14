@@ -15,6 +15,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{title}} Weekly</title>
     <style type="text/css">
+      .btn {
+        display: inline-block;
+        margin-bottom: 0;
+        font-weight: normal;
+        text-align: center;
+        vertical-align: middle;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        cursor: pointer;
+        background-image: none;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        padding: 10px 15px;
+        font-size: 15px;
+        cursor: pointer;
+        line-height: 1.42857143;
+      }
+      .btn-primary {
+        color: #ffffff;
+        background-color: #000000;
+        border-color: #000000;
+      }
       .tag-link {
         text-decoration: none!important;
         color: #f56a6a!important;
@@ -58,6 +80,7 @@
   			padding:0;
   			width:100%;
   		}
+      
   		.mcnPreviewText{
   			display:none !important;
   		}
@@ -112,10 +135,14 @@
   		}
   		.mcnImage,.mcnRetinaImage{
   			vertical-align:bottom;
+        margin-left:-35px;
   		}
   		.mcnTextContent{
   			word-break:break-word;
   		}
+      .mcnTextContent ul {
+        padding-left: 10px;
+      } 
   		.mcnTextContent img{
   			height:auto !important;
   		}
@@ -602,43 +629,8 @@
                   <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
                     <tr>
                       <td valign="top" class="headerContainer">
-                        <table class="mcnCaptionBlock" width="100%" cellspacing="0" cellpadding="0" border="0">
-                          <tbody class="mcnCaptionBlockOuter">
-                            <tr>
-                              <td class="mcnCaptionBlockInner" style="padding:9px;" valign="top">
-                                <table class="mcnCaptionRightContentOuter" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                  <tbody>
-                                    <tr>
-                                      <td class="mcnCaptionRightContentInner" style="padding:0 9px ;" valign="top">
-                                        <table class="mcnCaptionRightImageContentContainer" width="132" cellspacing="0" cellpadding="0" border="0" align="left">
-                                          <tbody>
-                                            <tr>
-                                              <td class="mcnCaptionRightImageContent" valign="top" align="left">
-                                                <a href="{{host}}" title="{{appName}}" class="" target="_blank">
-                                                  <img alt="" src="{{host}}/uploads/kala-logo-1.png" style="max-width:50px;" class="mcnImage" width="50">
-                                                </a>
-                                              </td>
-                                            </tr>
-                                          </tbody>
-                                        </table>
-                                        <table class="mcnCaptionRightTextContentContainer" width="396" cellspacing="0" cellpadding="0" border="0" align="right">
-                                          <tbody>
-                                            <tr>
-                                              <td class="mcnTextContent" valign="top">
-                                                  <h1 class="null">{{appName}}</h1>
-                                                  {{week_date}}
-                                              </td>
-                                            </tr>
-                                          </tbody>
-                                        </table>
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+
+                        <!-- header -->
 
                         <table class="mcnCaptionBlock" width="100%" cellspacing="0" cellpadding="0" border="0">
                           <tbody class="mcnCaptionBlockOuter">
@@ -647,25 +639,32 @@
                                 <table class="mcnCaptionRightContentOuter" width="100%" cellspacing="0" cellpadding="0" border="0">
                                   <tbody>
                                     <tr>
-                                      <td class="mcnCaptionRightContentInner" style="padding:0 9px; text-align: center" valign="top">
-                                        {{#tags}}
-                                          <span class="tag">{{.}}</span>
-                                          <span class="tag-sep">&#183;</span>
-                                        {{/tags}}
+                                      <td class="mcnCaptionRightContentInner" valign="top">
+                                        <table class="mcnCaptionRightImageContentContainer" width="132" cellspacing="0" cellpadding="0" border="0" align="left">
+                                          <tbody>
+                                            <tr>
+                                              <td class="mcnCaptionRightImageContent" style="margin-left: -35px;" valign="top" align="left">
+                                                <a href="{{host}}" title="{{appName}}" class="" target="_blank">
+                                                  <img alt="" src="https://objects-us-east-1.dream.io/dot-data/assets/uploads/kala-logo-1.png" style="max-width:170px;" class="mcnImage">
+                                                </a>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                      <td class="mcnCaptionRightContentInner" style="padding-bottom: 25px;" valign="bottom">
+                                        <table class="mcnCaptionRightTextContentContainer" width="396" cellspacing="0" cellpadding="0" border="0" align="right">
+                                          <tbody>
+                                            <tr>
+                                              <td class="mcnTextContent" valign="top">
+                                                {{week_date}}
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
                                       </td>
                                     </tr>
                                   </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                        <table class="mcnDividerBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                          <tbody class="mcnDividerBlockOuter">
-                            <tr>
-                              <td class="mcnDividerBlockInner" style="min-width:100%; padding:18px;">
-                                <table class="mcnDividerContent" style="min-width: 100%;border-top: 5px solid #F56A6A;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                  <tbody><tr><td><span></span></td></tr></tbody>
                                 </table>
                               </td>
                             </tr>
@@ -696,6 +695,7 @@
                             </tr>
                           </tbody>
                         </table>
+                        <!-- divider -->
                         <table class="mcnDividerBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
                           <tbody class="mcnDividerBlockOuter">
                             <tr>
@@ -709,6 +709,7 @@
                         </table>
 
                         <!-- details end -->
+
                       </td>
                     </tr>
                   </table>
@@ -742,6 +743,104 @@
                 </td>
               </tr>
               <tr>
+                <td align="center" valign="top" id="templateBody">
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
+                    <tr>
+                      <td valign="top" class="headerContainer">
+                        <table class="mcnDividerBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
+                          <tbody class="mcnDividerBlockOuter">
+                            <tr>
+                              <td class="mcnDividerBlockInner" style="min-width:100%; padding:18px;">
+                                <table class="mcnDividerContent" style="min-width: 100%;border-top: 5px solid #F56A6A;" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                  <tbody><tr><td><span></span></td></tr></tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" valign="top" id="headerContainer">
+                        <!--[if (gte mso 9)|(IE)]>
+                        <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;">
+                        <tr>
+                        <td align="center" valign="top" width="600" style="width:600px;">
+                        <![endif]-->
+                        <table class="mcnCaptionBlock" width="100%" cellspacing="0" cellpadding="0" border="0">
+                          <tbody class="mcnCaptionBlockOuter">
+                            <tr>
+                              <td class="mcnCaptionBlockInner" style="padding:9px;" valign="top">
+                                <table class="mcnCaptionRightContentOuter" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                  <tbody>
+                                    <tr>
+                                      <td class="mcnCaptionRightContentInner" style="padding:0 9px; text-align: center" valign="top">
+                                        <h3>Please, click the confirm button to confirm your request and proceed to payment</h3>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <!--[if (gte mso 9)|(IE)]>
+                        </td>
+                        </tr>
+                        </table>
+                        <![endif]-->
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="top" class="headerContainer">
+                        <table class="mcnDividerBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
+                          <tbody class="mcnDividerBlockOuter">
+                            <tr>
+                              <td class="mcnDividerBlockInner" style="min-width:100%; padding:18px;">
+                                <table class="mcnDividerContent" style="min-width: 100%;border-top: 5px solid #fff;" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                  <tbody><tr><td><span></span></td></tr></tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td align="center" valign="top" id="headerContainer">
+                        <!--[if (gte mso 9)|(IE)]>
+                        <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;">
+                        <tr>
+                        <td align="center" valign="top" width="600" style="width:600px;">
+                        <![endif]-->
+                        <table class="mcnCaptionBlock" width="100%" cellspacing="0" cellpadding="0" border="0">
+                          <tbody class="mcnCaptionBlockOuter">
+                            <tr>
+                              <td class="mcnCaptionBlockInner" style="padding:9px;" valign="top">
+                                <table class="mcnCaptionRightContentOuter" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                  <tbody>
+                                    <tr>
+                                      <td class="mcnCaptionRightContentInner" style="padding:0 9px; text-align: center" valign="top">
+                                        <a href="{{host}}/product/rebuild/{{hash}}/a2b3de50accd45eda2b10a8d" ><button class="btn btn-primary">Confirm</button></a>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <!--[if (gte mso 9)|(IE)]>
+                        </td>
+                        </tr>
+                        </table>
+                        <![endif]-->
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
                 <td align="center" valign="top" id="templateFooter">
                   <!--[if (gte mso 9)|(IE)]>
                   <table align="center" border="0" cellspacing="0" cellpadding="0" width="600" style="width:600px;">
@@ -751,164 +850,6 @@
                   <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" class="templateContainer">
                     <tr>
                       <td valign="top" class="footerContainer">
-                        <table class="mcnFollowBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                          <tbody class="mcnFollowBlockOuter">
-                            <tr>
-                              <td style="padding:9px" class="mcnFollowBlockInner" valign="top" align="center">
-                                <table class="mcnFollowContentContainer" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                  <tbody>
-                                    <tr>
-                                      <td style="padding-left:9px;padding-right:9px;" align="center">
-                                        <table style="min-width:100%;" class="mcnFollowContent" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                          <tbody>
-                                            <tr>
-                                              <td style="padding-top:9px; padding-right:9px; padding-left:9px;" valign="top" align="center">
-                                                <table cellspacing="0" cellpadding="0" border="0" align="center">
-                                                  <tbody>
-                                                    <tr>
-                                                      <td valign="top" align="center">
-                                                        <!--[if mso]>
-                                                        <table align="center" border="0" cellspacing="0" cellpadding="0">
-                                                        <tr>
-                                                        <![endif]-->
-                                                        
-                                                        <!--[if mso]>
-                                                        <td align="center" valign="top">
-                                                        <![endif]-->
-                                                        <table style="display:inline;" cellspacing="0" cellpadding="0" border="0" align="left">
-                                                          <tbody>
-                                                            <tr>
-                                                              <td style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer" valign="top">
-                                                                <table class="mcnFollowContentItem" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                                                  <tbody>
-                                                                    <tr>
-                                                                      <td style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;" valign="middle" align="left">
-                                                                        <table width="" cellspacing="0" cellpadding="0" border="0" align="left">
-                                                                          <tbody>
-                                                                            <tr>
-                                                                              <td class="mcnFollowIconContent" width="24" valign="middle" align="center">
-                                                                                <a href="http://www.twitter.com/" target="_blank">
-                                                                                  <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/color-twitter-48.png" alt="Twitter" style="display:block;" class="" width="24" height="24">
-                                                                                </a>
-                                                                              </td>
-                                                                            </tr>
-                                                                          </tbody>
-                                                                        </table>
-                                                                      </td>
-                                                                    </tr>
-                                                                  </tbody>
-                                                                </table>
-                                                              </td>
-                                                            </tr>
-                                                          </tbody>
-                                                        </table>
-                                                        <!--[if mso]>
-                                                        </td>
-                                                        <![endif]-->
-                                                    
-                                                        <!--[if mso]>
-                                                        <td align="center" valign="top">
-                                                        <![endif]-->
-                                                        <table style="display:inline;" cellspacing="0" cellpadding="0" border="0" align="left">
-                                                          <tbody>
-                                                            <tr>
-                                                              <td style="padding-right:10px; padding-bottom:9px;" class="mcnFollowContentItemContainer" valign="top">
-                                                                <table class="mcnFollowContentItem" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                                                  <tbody>
-                                                                    <tr>
-                                                                      <td style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;" valign="middle" align="left">
-                                                                          <table width="" cellspacing="0" cellpadding="0" border="0" align="left">
-                                                                            <tbody>
-                                                                              <tr>
-                                                                                <td class="mcnFollowIconContent" width="24" valign="middle" align="center">
-                                                                                  <a href="http://www.facebook.com" target="_blank">
-                                                                                    <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/color-facebook-48.png" alt="Facebook" style="display:block;" class="" width="24" height="24">
-                                                                                  </a>
-                                                                                </td>
-                                                                              </tr>
-                                                                            </tbody>
-                                                                          </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                  </tbody>
-                                                                </table>
-                                                              </td>
-                                                            </tr>
-                                                          </tbody>
-                                                        </table>
-                                                        <!--[if mso]>
-                                                        </td>
-                                                        <![endif]-->
-                                                        <!--[if mso]>
-                                                        <td align="center" valign="top">
-                                                        <![endif]-->
-                                                        <table style="display:inline;" cellspacing="0" cellpadding="0" border="0" align="left">
-                                                          <tbody>
-                                                            <tr>
-                                                              <td style="padding-right:0; padding-bottom:9px;" class="mcnFollowContentItemContainer" valign="top">
-                                                                <table class="mcnFollowContentItem" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                                                  <tbody>
-                                                                    <tr>
-                                                                      <td style="padding-top:5px; padding-right:10px; padding-bottom:5px; padding-left:9px;" valign="middle" align="left">
-                                                                        <table width="" cellspacing="0" cellpadding="0" border="0" align="left">
-                                                                          <tbody>
-                                                                            <tr>
-                                                                              <td class="mcnFollowIconContent" width="24" valign="middle" align="center">
-                                                                                <a href="http://mailchimp.com" target="_blank">
-                                                                                  <img src="https://cdn-images.mailchimp.com/icons/social-block-v2/color-link-48.png" alt="Website" style="display:block;" class="" width="24" height="24">
-                                                                                </a>
-                                                                              </td>
-                                                                            </tr>
-                                                                          </tbody>
-                                                                        </table>
-                                                                      </td>
-                                                                    </tr>
-                                                                  </tbody>
-                                                                </table>
-                                                              </td>
-                                                            </tr>
-                                                          </tbody>
-                                                        </table>
-                                                        <!--[if mso]>
-                                                        </td>
-                                                        <![endif]-->
-                                                        
-                                                        <!--[if mso]>
-                                                        </tr>
-                                                        </table>
-                                                        <![endif]-->
-                                                      </td>
-                                                    </tr>
-                                                  </tbody>
-                                                </table>
-                                              </td>
-                                            </tr>
-                                          </tbody>
-                                        </table>
-                                      </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                        <table class="mcnDividerBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                          <tbody class="mcnDividerBlockOuter">
-                            <tr>
-                              <td class="mcnDividerBlockInner" style="min-width: 100%; padding: 10px 18px 25px;">
-                                <table class="mcnDividerContent" style="min-width: 100%;border-top: 2px solid #EEEEEE;" width="100%" cellspacing="0" cellpadding="0" border="0">
-                                    <tbody><tr>
-                                        <td>
-                                            <span></span>
-                                        </td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
                         <table class="mcnTextBlock" style="min-width:100%;" width="100%" cellspacing="0" cellpadding="0" border="0">
                           <tbody class="mcnTextBlockOuter">
                             <tr>
@@ -925,7 +866,7 @@
                                   <tbody>
                                     <tr>
                                       <td class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;" valign="top">
-                                        <em>Copyright {{year}} <span>KALA&copy;</span>, All rights reserved.</em><br>
+                                        <em>{{year}}<span>KALA&copy;</span>, All rights reserved.</em><br>
                                         {{list_description}}<br>
                                         <br>
                                       </td>
