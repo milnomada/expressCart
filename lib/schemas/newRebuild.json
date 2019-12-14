@@ -1,0 +1,29 @@
+{
+    "id": "/newRebuild",
+    "type": "object",
+    "properties": {
+        "created": {
+            "type": "Date"
+        },
+        "customerEmail": {
+            "type": "string"
+        },
+        "signature": {
+            "type": "string"
+        },
+        "units": {
+          "type": ["number", 1]
+        },
+        "status": {
+          "type": ["number", 0]
+        },
+        "productId": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "productId",
+        "customerEmail",
+        "created"
+    ]
+}
