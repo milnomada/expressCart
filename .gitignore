@@ -1,7 +1,7 @@
 node_modules/
 data/
-/config/*-local.json
-/config/settings*
+config/*-local.json
+config/settings*
 /config/paypal.*
 /config/stripe.*
 /public/uploads
