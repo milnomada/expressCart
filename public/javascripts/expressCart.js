@@ -1,8 +1,8 @@
 /* eslint-disable prefer-arrow-callback, no-var, no-tabs */
 /* globals AdyenCheckout */
-$(document).ready(function (){
-    var productId = $('.quantity').attr('data-id'),
-        imageCount = parseInt($('.quantity').attr('data-sz')),
+$(document).ready(function(){
+    var productId = $('.product-details').attr('data-id'),
+        imageCount = parseInt($('.product-details').attr('data-sz')),
         pad;
 
     console.log(productId, imageCount)
@@ -295,7 +295,19 @@ $(document).ready(function (){
       console.log(e, n);
     }
 
-    if($('#pager').length){
+    var pageLen = $('#productsPerPage').val();
+    var productCount = $('#totalProductCount').val();
+    var paginateUrl = $('#paginateUrl').val();
+    var searchTerm = $('#searchTerm').val();
+    var pagerHref = '/' + paginateUrl + '/' + searchTerm + '{{number}}';
+    var totalProducts = Math.ceil(productCount / pageLen);
+
+    console.log($('.kala-links li').get($('#pageNum').val()))
+    var index = ($('#pageNum').val() || 1) - 1;
+    var elem = $('.kala-links li').get(index);
+    $(elem).find('a').addClass('selected')
+
+    /* if($('#pager').length){
       var pageNum = $('#pageNum').val();
       var pageLen = $('#productsPerPage').val();
       var productCount = $('#totalProductCount').val();
@@ -309,7 +321,7 @@ $(document).ready(function (){
       var pagerHref = '/' + paginateUrl + '/' + searchTerm + '{{number}}';
       var totalProducts = Math.ceil(productCount / pageLen);
 
-      /* if(parseInt(productCount) > parseInt(pageLen)){
+      if(parseInt(productCount) > parseInt(pageLen)){
         $('#pager').bootpag({
           total: totalProducts,
           page: pageNum,
@@ -320,9 +332,9 @@ $(document).ready(function (){
           nextClass: 'waves-effect',
           activeClass: 'pag-active waves-effect'
         }).on('page', onPageCallback)
-      } */
-    }
-
+      }
+    } */
+ 
     $(document).on('click', '#btnPageUpdate', function(e){
         e.preventDefault();
         $.ajax({
@@ -791,7 +803,7 @@ $(document).ready(function (){
     });
 
     // Compute quantity here
-    var stock = parseInt($('.quantity').attr('data-q')),
+    var stock = parseInt($('.product-details').attr('data-q')),
         requested = parseInt($('#product_quantity').val())
         ;
 
@@ -801,6 +813,8 @@ $(document).ready(function (){
     $('.qty-btn-minus').on('click', function(){
         var number = parseInt($('#product_quantity').val()) - 1;
         $('#product_quantity').val(number > 0 ? number : 1);
+        if(stock >= requested)
+          $('.qty-btn-plus').show()
     });
 
     $('.qty-btn-plus').on('click', function(){
@@ -920,7 +934,9 @@ $(document).ready(function (){
 
         console.log($('#uniqueProduct').attr("checked"), $('#uniqueProduct:checked'))
         if($('#uniqueProduct:checked') > 0) {
-          $('#uniqueProduct').val(true)
+          $('#uniqueProduct').val('on')
+        } else {
+          $('#uniqueProduct').val('off')
         }
     });
 
