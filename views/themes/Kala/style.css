@@ -38,7 +38,7 @@ label[for=newCustomerPassword] {
 }
 
 .body_text {
-  padding-top: 40px;
+  padding-top: 50px;
 }
 .quantity .btn-primary.nope:focus,
 .quantity .btn-primary.nope:focus-within,
@@ -175,8 +175,36 @@ label[for=newCustomerPassword] {
   background-color: transparent;
 }
 
-.font-kala {
+.product_wrapper {
+  background: rgb(233,227,227);
+  background: -moz-linear-gradient(90deg, rgba(233,227,227,1) 5%, rgba(235,229,229,1) 33%, rgba(233,227,227,1) 66%, rgba(233,227,227,1) 95%);
+  background: -webkit-linear-gradient(90deg, rgba(233,227,227,1) 5%, rgba(235,229,229,1) 33%, rgba(233,227,227,1) 66%, rgba(233,227,227,1) 95%);
+  background: linear-gradient(90deg, rgba(233,227,227,1) 5%, rgba(235,229,229,1) 33%, rgba(233,227,227,1) 66%, rgba(233,227,227,1) 95%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e9e3e3",endColorstr="#e9e3e3",GradientType=1);
 }
+
+.kala-links {
+  position: absolute;
+  top: 20%;
+  left: 10%;
+}
+.kala-links ul { padding-left: 10px; }
+
+.kala-links ul li { list-style: none; }
+.kala-links ul li a {
+  border: 1px solid transparent;
+  display: inline-block;
+  margin-top: 0px;
+  padding-bottom: 10px;
+}
+/* .kala-links ul li a:hover {
+  border: 1px solid #555;
+} */
+.kala-links ul li a.selected {
+  border: 1px solid #000;
+}
+.kala-links ul li img { width: 75px; }
+
 .footer.v1 {
   background: rgb(229,213,197);
   background: -moz-linear-gradient(90deg, rgba(229,213,197,1) 0%, rgba(239,229,217,1) 50%, rgba(245,238,229,1) 100%);
@@ -186,9 +214,9 @@ label[for=newCustomerPassword] {
 }
 .footer.v2 {
   background: rgb(224,222,227);
-  background: -moz-linear-gradient(90deg, rgba(224,222,227,1) 5%, rgba(226,220,223,1) 50%, rgba(236,236,244,1) 95%);
-  background: -webkit-linear-gradient(90deg, rgba(224,222,227,1) 5%, rgba(226,220,223,1) 50%, rgba(236,236,244,1) 95%);
-  background: linear-gradient(90deg, rgba(224,222,227,1) 5%, rgba(226,220,223,1) 50%, rgba(236,236,244,1) 95%);
+  background: -moz-linear-gradient(90deg, rgba(224,222,227,1) 5%, rgba(228,227,231,1) 33%, rgba(235,234,240,1) 66%, rgba(236,236,244,1) 95%);
+  background: -webkit-linear-gradient(90deg, rgba(224,222,227,1) 5%, rgba(228,227,231,1) 33%, rgba(235,234,240,1) 66%, rgba(236,236,244,1) 95%);
+  background: linear-gradient(90deg, rgba(224,222,227,1) 5%, rgba(228,227,231,1) 33%, rgba(235,234,240,1) 66%, rgba(236,236,244,1) 95%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#e0dee3",endColorstr="#ececf4",GradientType=1);
 }
 

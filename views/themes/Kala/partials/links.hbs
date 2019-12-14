@@ -1,0 +1,13 @@
+<div class="kala-links">
+  <ul>
+    {{#times (sum totalProductCount 1)}}
+      {{#if @number}}
+        {{#ifCond @number '==' @root.pageNum }}
+          <li><a href="/lamp/{{@number}}" class="selected" ><img src="/uploads/thumbs/kala-{{@number}}-bn.png"></a></li>
+        {{else}}
+          <li><a href="/lamp/{{@number}}" ><img src="/uploads/thumbs/kala-{{@number}}-bn.png"></a></li>
+        {{/ifCond}}
+      {{/if}}
+    {{/times}}
+  </ul>
+</div>

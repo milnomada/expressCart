@@ -30,6 +30,7 @@
     <link rel="stylesheet" href="/stylesheets/style{{config.env}}.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.2/roundslider.min.css" />
     {{#if admin}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css" rel="stylesheet">
     <link rel="stylesheet" href="/stylesheets/admin{{config.env}}.css">
     {{/if}}
     
@@ -167,11 +168,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
-    <script src="/javascripts/jquery.bootpag.min.js"></script>
+    <!-- tbd <script src="/javascripts/jquery.bootpag.min.js"></script> -->
     <script src="/javascripts/cssbeautify.min.js"></script>
-    {{#unless admin}}
+    {{#if admin}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.min.js"></script>
+    <script type="text/javascript">
+      if(typeof __editor !== typeof undefined) {
+        $('#editor').summernote({
+            height: 300,
+            minHeight: null
+        });
+      }
+    </script>
+    {{else}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-    {{/unless}}
+    {{/if}}
     <script src="/javascripts/expressCart{{config.env}}.js"></script>
     <script src="/javascripts/jquery.dotdotdot.min.js"></script>
     <script src="/javascripts/jquery.payment.min.js"></script>
