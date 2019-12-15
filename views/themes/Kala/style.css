@@ -542,6 +542,30 @@ label[for=newCustomerPassword] {
   padding-bottom: 10px;
 }
 
+.cc-box input {
+  padding: .6em;
+  font-size: 1em;
+  color: #777;
+  margin-right: 1em;
+  height: 3em;
+}
+.cc-box input::placeholder {
+  font-size: .9em;
+  text-align: center;
+}
+.cc-box .cc-item {
+  display: inline-block;
+}
+.cc-number {
+  width: 14em;
+}
+.cc-expires {
+  width: 6em;
+}
+.cc-cvc {
+  width: 4em;
+}
+
 #checkout_paypal {
   padding: 0px 5px;
 }

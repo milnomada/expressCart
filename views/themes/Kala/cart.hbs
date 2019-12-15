@@ -128,14 +128,19 @@
             <div class="payment-details" data-type="card" data-id="">
                 <div class="description">Insert credit card details:</div>
                 <div class="cc-box">
-                  <input type="text" class="cc-number" name="">
-                  <input type="text" class="cc-expires" name="">
-                  <input type="text" class="cc-cvc" name="">
+                  <div class="cc-item">
+                    <label for="cc-number" class="cc-label">Credit card number</label>
+                    <input type="text" class="form-control cc-number" placeholder="1234 1234 1234 1234 1234" name="">
+                  </div>
+                  <div class="cc-item"><input type="text" class="form-control cc-expires" name="" placeholder="MM / YYYY"></div>
+                  <div class="cc-item"><input type="text" class="form-control cc-cvc" placeholder="123" name=""></div>
                 </div>
             </div>
-            <div class="payment-details" data-type="paypal">
-                <div class="title">PayPal</div>
-                <div class="img-holder"><img src="/images/v_paypal.png" alt="PayPal"></div>
+            <div class="payment-details" data-type="paypal" id="checkout_paypal" >
+                <div class="payment-type">
+                  <div class="title">PayPal</div>
+                  <div class="img-holder"><img src="/images/v_paypal.png" alt="PayPal"></div>
+                </div>
             </div>
           </div>
         </div>

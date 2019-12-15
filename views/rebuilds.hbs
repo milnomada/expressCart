@@ -40,27 +40,54 @@
                   <strong>{{ @root.__ "Recent rebuilds" }}</strong>
               {{/if}}
             </li>
+            <li>
+              <canvas id="rebuilds" width="800" height="200"></canvas>
+            </li>
+        </ul>
+        <table class="list-table rebuilds">
+          <thead>
+            <tr>
+              <th>Created</th>
+              <th>View product</th>
+              <th>{{ @root.__ "Status" }}</th>
+              <th>Customer Email</th>
+              <th>View rebuild</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
             {{#if rebuilds}}
               {{#each rebuilds}}
-                <li class="list-group-item">
-                    <h4 class="pull-right" style="padding-left: 10px;">
-                        {{ @root.__ "Status" }}: <span class="text-green">{{getStatusRebuild this.status}}</span>
-                        <a class="text-danger" href="/admin/order/delete/{{this._id}}" onclick="return confirm('Are you sure you want to delete this order?');"> <i class="fa fa-trash-o"></i></a>
-                    </h4>
-                    <h5>
-                        <a href="/admin/order/view/{{this._id}}" class="text-success">View order</a> - <span class="text-info">Date: </span>{{formatDate this.created "DD/MM/YYYY hh:mm"}} | <span class="text-info">Email:</span> {{this.customerEmail}}
-
-                        <a href="/admin/product/edit/{{this.productId}}" class="text-success">View product</a>
-                    </h5>
-                </li>
+                <tr class="list-group-item">
+                    <td colspan="1">
+                      <span data-dt="{{this.created}}" class="rebuild-dt text-info">{{formatDate this.created "DD/MM/YYYY hh:mm"}}</span>
+                    </td>
+                    <td colspan="1">
+                      <a href="/admin/product/edit/{{this.productId}}" class="">View product</a>
+                    </td>
+                    <td colspan="1">
+                      <i class="fa fa-circle" data-status="{{this.status}}"></i>
+                      <span class="text-green">{{getStatusRebuild this.status}}</span>
+                    </td>
+                    <td colspan="1">
+                      <span class="text-info">{{this.customerEmail}}</span>
+                    </td>
+                    <td colspan="1">
+                        <a href="/admin/order/view/{{this._id}}" class="text-success">View order</a>
+                    </td>
+                     <td colspan="1">
+                      <a class="" href="/admin/order/delete/{{this._id}}" onclick="return confirm('Are you sure you want to delete this order?');"><i class="fa fa-trash-o"></i></a>
+                    </td>
+                  </tr>
               {{/each}}
             {{else}}
-                <li class="list-group-item">
-                    <h4 class="text-center">
+                <tr class="list-group-item">
+                    <td colspan="6" class="text-center">
                         {{ @root.__ "No rebuilds found" }}
-                    </h4>
+                    </td>
                 </li>
             {{/if}}
-        </ul>
+          </tbody>
+        </table>
     </div>
 </div>
