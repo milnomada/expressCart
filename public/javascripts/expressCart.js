@@ -1,4 +1,14 @@
 /* eslint-disable prefer-arrow-callback, no-var, no-tabs */
+
+function isNumber(evt) {
+    evt = (evt) ? evt : window.event;
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        return false;
+    }
+    return true;
+}
+
 /* globals AdyenCheckout */
 $(document).ready(function(){
     var productId = $('.product-details').attr('data-id'),
@@ -104,6 +114,57 @@ $(document).ready(function(){
       top: "-" + ((70 * ((100 * w) / (1920))) / 100) + "px",
       left: "calc(50% - " + ((100 * w) / (1920)) + "px)"
     })*/
+
+    /**
+     * cc logic
+     * Credit card form format as it types
+     */
+  
+    var ccNumUpdate = false;
+    $('.cc-number').on('keypress', function(e){
+      var n;
+      if(isNumber(e)) {
+        n = $(this).val().replace(/\s/g,'').length
+        if(n == 20) 
+          return false;
+        if($(this).val().length > 0 && n % 4 === 0) {
+          $(this).val( $(this).val() + " ")
+        }
+
+      } else {
+        return false
+      }
+    })
+
+    $('.cc-expires').on('keypress', function(e){
+      var n;
+      if(isNumber(e)) {
+        n = $(this).val().replace(/\s/g,'').replace(/\//g,'').length
+        if(n == 6) 
+          return false;
+        if(n == 2) {
+          $(this).val( $(this).val().replace(/\s/g,'').replace(/\//g,'') + " / ")
+        } else if(n < 2) {
+          $(this).val( $(this).val().replace(/\s/g,'').replace(/\//g,'') )
+        }
+
+      } else {
+        return false
+      }
+    })
+
+    $('.cc-cvc').on('keypress', function(e){
+      var n;
+      if(isNumber(e)) {
+        n = $(this).val().replace(/\s/g,'').replace(/\//g,'').length
+        if(n == 3) 
+          return false;
+      } else {
+        // $(this).val( $(this).val().slice(0, $(this).val().length-2) )
+        return false
+      }
+    })
+
     var lastScrollTop = 0, active = false;
     $(window).on('scroll', function(event) {
       if(active)
@@ -952,11 +1013,6 @@ $(document).ready(function(){
 		    // alert
         showNotification(messageVal, messageTypeVal, false);
     }
-
-    $('input.cc-number').payment('formatCardNumber');
-    $('input.cc-expires').payment('formatCardExpiry');
-    $('input.cc-cvc').payment('formatCardCVC');
-    
 });
 
 function deleteFromCart(element){
