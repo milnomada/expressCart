@@ -524,24 +524,60 @@ label[for=newCustomerPassword] {
 .delete-item:hover {
   color: #000;
 }
-
+.payment-details {
+  display: none;
+}
 .payment-type {
   margin-top: 10px;
   margin-bottom: 10px;
-}
-.payment-type .img-holder {
-  display: inline-block;
   border: 2px solid #dce4ec;
+  display: inline-block;
+  padding: 10px 20px 0px 20px;
+}
+.img-holder {
+  display: inline-block;
+  border: 2px solid transparent;
   padding: 10px;
-  cursor: pointer;
 }
-.payment-type .img-holder img {
-  height: 20px;
-}
-.payment-type .title {
-  padding-bottom: 10px;
+.payment-type img {
+  height: 30px;
 }
 
+.payment-type input[type=radio] {
+  cursor: pointer;
+  margin-right: .3em;
+}
+
+.payment-action {
+  margin-top: 10px;
+  border: 2px solid #dce4ec;
+  display: inline-block;
+  padding: 0px 10px 0px 15px;
+  cursor: pointer;
+  transition: .2s;
+}
+.payment-action:hover {
+  border: 2px solid #18bc9c;
+}
+.payment-action .title,
+.payment-type .title {
+  padding-bottom: 10px;
+  display: inline-block;
+}
+.payment-action i {
+  font-size: 1em;
+  padding: 5px 10px;
+  margin: 5px 0px 5px 0px;
+}
+.payment-action img {
+  height: 20px;
+}
+.payment-type .form-check {
+  display: inline-block;
+}
+.cc-box {
+  margin-top: 10px;
+}
 .cc-box input {
   padding: .6em;
   font-size: 1em;
@@ -567,12 +603,10 @@ label[for=newCustomerPassword] {
 }
 
 #checkout_paypal {
-  padding: 0px 5px;
 }
 #checkout_paypal i {
-  font-size: 3em;
+  /*font-size: 3em; margin-left: 5px; */
   line-height: 1em;
-  margin-left: 5px;
 }
 #customerLogout {
   margin-bottom: 15px;

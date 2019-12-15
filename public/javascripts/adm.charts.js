@@ -104,6 +104,12 @@ var getRebuildStatusColor = function(s){
   }
 }
 
+/**
+ * For compatibility with Paypal statuses, this method
+ * translates a status string to a numeric code
+ * @param  {String} status    String status (Paid)
+ * @return {Int}              Numeric status
+ */
 var translateStatus = function(status) {
   switch(status){
     case 'Paid':
@@ -113,6 +119,8 @@ var translateStatus = function(status) {
     case 'Approved - Processing':
         return 2;
     case 'Failed':
+        return 6;
+    case 'Declined':
         return 6;
     case 'Completed':
         return 4;

@@ -121,6 +121,35 @@ $(document).ready(function(){
      */
   
     var ccNumUpdate = false;
+
+    $('.form-check-input').on('click', function(e){
+      console.log(e, e.target)
+      var paymentMode = $(e.target).val()
+      if(e.target.checked) {
+        switch(paymentMode){
+          case 'card':
+            $('.payment-details[data-type=paypal]').slideUp(400, function(){
+              $('.payment-details[data-type=card]').slideDown()  
+            })
+            break;
+          case 'paypal':
+            $('.payment-details[data-type=card]').slideUp(400, function(){
+              $('.payment-details[data-type=paypal]').slideDown()  
+            })
+            break;
+        }
+      } else {
+        switch(paymentMode){
+          case 'card':
+            $('.payment-details[data-type=card]').slideUp()
+            break;
+          case 'paypal':
+            $('.payment-details[data-type=card]').slideUp()
+            break;
+        }
+      }
+    })
+
     $('.cc-number').on('keypress', function(e){
       var n;
       if(isNumber(e)) {
@@ -234,7 +263,11 @@ $(document).ready(function(){
     });
 
     $('#checkout_paypal').on('click', function(){
-      $('#shipping-form').submit()
+      if($('#shipping-form').validator('validate').has('.has-error').length === 0){
+        $('.payment-action').html('Redirecting <i class="fa fa-refresh fa-spin"></i>')  
+      }
+      $('#shipping-form').submit();
+      
     })
 
     $('#sendTestEmail').on('click', function(e){

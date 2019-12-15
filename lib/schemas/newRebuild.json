@@ -19,6 +19,9 @@
         },
         "productId": {
             "type": "string"
+        },
+        "orderId": {
+            "type": ["string", null]
         }
     },
     "required": [

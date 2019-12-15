@@ -170,7 +170,7 @@
 	"New user": "New user",
 	"Payment ID": "Payment ID",
 	"Payment Message": "Payment Message",
-  "Credit card": "Credit card",
+	"Credit card": "Credit card",
 	"Cart Email": "Cart Email",
 	"View": "View",
 	"Illumination": "Illumination",
@@ -210,5 +210,16 @@
 	"About": "About",
 	"New pieces": "New pieces",
 	"Last item": "Last item",
-	"Choose Payment": "Choose Payment"
+	"Choose Payment": "Choose Payment",
+	"Choose Payment mode": "Choose Payment mode",
+	"Pay": "Pay",
+	"Choose payment mode": "Choose payment mode",
+	"PayPal": "PayPal",
+
+	"Insert credit card details": "Insert credit card details",
+	"Credit card number": "Credit card number",
+	"Expire date": "Expire date",
+	"Cvc": "Cvc",
+	"redirection_html": "<span>You will be redirected to Paypal website to confirm the payment</span><br><small>Once, the payment is confirmed, you will be redirected back here where a confirmation message will display the transaction details.</small>",
+	"Pay with": "Pay with"
 }

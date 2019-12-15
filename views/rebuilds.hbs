@@ -73,10 +73,14 @@
                       <span class="text-info">{{this.customerEmail}}</span>
                     </td>
                     <td colspan="1">
-                        <a href="/admin/order/view/{{this._id}}" class="text-success">View order</a>
+                        {{#if this.orderId}}
+                          <a href="/admin/order/view/{{this.orderId}}" class="text-success">View order</a>
+                        {{else}}
+                          <span>Order not created</span>
+                        {{/if}}
                     </td>
                      <td colspan="1">
-                      <a class="" href="/admin/order/delete/{{this._id}}" onclick="return confirm('Are you sure you want to delete this order?');"><i class="fa fa-trash-o"></i></a>
+                      <a class="" href="/admin/rebuild/delete/{{this._id}}" onclick="return confirm('Are you sure you want to delete this order?');"><i class="fa fa-trash-o"></i></a>
                     </td>
                   </tr>
               {{/each}}

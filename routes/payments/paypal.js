@@ -69,7 +69,45 @@ const getShippingCosts = (country, region) => {
   }
 }
 
+/**
+ * Translate Status from payment to rebuild
+ *  case 0: created
+ *  case 1: confirmed
+ *  case 2: paid
+ *  case 3: started -- building, set manually when start the actual build
+ *  case 4: sent
+ *  case 5: cancelled
+ *  
+ * @param  {String} status    Payment status string
+ * @return {Int}              Integer rebuild code
+ */
+const translateToRebuildStatus = (status) => {
+  switch(status){
+    case 'Paid':
+        return 2;
+    case 'Approved':
+        return 1;
+    case 'Approved - Processing':
+        return 1;
+    case 'Declined':
+        return 5;
+    case 'Completed':
+        return 2;
+    case 'Shipped':
+        return 4;
+    case 'Pending':
+        return 0;
+    default:
+        return 0;
+  }
+}
+
 router.get('/checkout_cancel', (req, res, next) => {
+    const db = req.app.db;
+    if(req.session.isRebuild) {
+        // update rebuild status
+        db.rebuilds.updateOne({_id: common.getId(req.session.rebuildId)}, {$set: {status: translateToRebuildStatus("Pending")}}, {upsert: true})
+    }
     // return to checkout for adjustment or repayment
     res.redirect('/checkout');
 });
@@ -102,6 +140,11 @@ router.get('/checkout_return', (req, res, next) => {
             req.session.paymentApproved = paymentApproved;
             req.session.paymentDetails = paymentDetails;
 
+            if(req.session.isRebuild) {
+                // update rebuild status
+                db.rebuilds.updateOne({_id: common.getId(req.session.rebuildId)}, {$set: {status: translateToRebuildStatus("Failed")}}, {upsert: true})
+            }
+
             res.redirect('/payment/' + req.session.orderId);
             return;
         }
@@ -110,19 +153,14 @@ router.get('/checkout_return', (req, res, next) => {
         const cart = req.session.cart
         let paymentStatus = 'Approved';
 
+        console.log("-->", payment);
+
         // fully approved
         if(payment.state === 'approved'){
             paymentApproved = true;
             paymentStatus = 'Paid';
             paymentMessage = 'Your payment was successfully completed';
             paymentDetails = '<p><strong>Order ID: </strong>' + paymentOrderId + '</p><p><strong>Transaction ID: </strong>' + payment.id + '</p>';
-
-            // clear the cart
-            if(req.session.cart){
-                req.session.cart = null;
-                req.session.orderId = null;
-                req.session.totalCartAmount = 0;
-            }
         }
 
         // failed
@@ -136,6 +174,10 @@ router.get('/checkout_return', (req, res, next) => {
         db.orders.updateOne({ _id: common.getId(paymentOrderId) }, { $set: { orderStatus: paymentStatus } }, { multi: false }, (err, numReplaced) => {
             if(err){
                 console.info(err.stack);
+            }
+            if(req.session.isRebuild) {
+                // update rebuild status
+                db.rebuilds.updateOne({_id: common.getId(req.session.rebuildId)}, {$set: {status: translateToRebuildStatus(paymentStatus)}}, {upsert: true})
             }
             db.orders.findOne({ _id: common.getId(paymentOrderId) }, (err, order) => {
                 if(err){
@@ -152,7 +194,7 @@ router.get('/checkout_return', (req, res, next) => {
                     req.session.paymentApproved = paymentApproved;
                     req.session.paymentDetails = paymentDetails;
 
-                    const paymentResults = {
+                    var paymentResults = {
                         message: req.session.message,
                         messageType: req.session.messageType,
                         paymentEmailAddr: req.session.paymentEmailAddr,
@@ -160,11 +202,30 @@ router.get('/checkout_return', (req, res, next) => {
                         paymentDetails: req.session.paymentDetails
                     };
 
-                    // send the email with the response
-                    // TODO: Should fix this to properly handle result
-                    // Updated:
-                    // - use renderPaymentEmail
+                    if(req.session.isRebuild) {
+                      paymentResults.greeting = {
+                        title: "Thanks for buying a Kala lamp!",
+                        message: "We will shortly send you an email when your Kala lamp is being crafted"
+                      }
+                    } else {
+                      paymentResults.greeting = {
+                        title: "Thanks for buying a Kala lamp!",
+                        message: "We hope you find joyful the light from your new Kala"
+                      }
+                    }
+
+                    // send the email with the confirmation
+                    console.log("Sending email to ", req.session.paymentEmailAddr)
                     common.sendEmail(req.session.paymentEmailAddr, 'Your payment with ' + config.cartTitle, common.renderPaymentEmail(paymentResults, cart));
+                    console.log("Sent")
+
+                    // clear the cart
+                    if(req.session.cart){
+                        req.session.cart = null;
+                        req.session.orderId = null;
+                        req.session.totalCartAmount = 0;
+                        common.emptyCart(req, res, 'silent');
+                    }
 
                     res.redirect('/payment/' + order._id);
                 });
@@ -217,7 +278,7 @@ router.post('/checkout_action', (req, res, next) => {
         }
         if(payment.payer.payment_method === 'paypal'){
             req.session.paymentId = payment.id;
-            let redirectUrl;
+            let redirectUrl, rebuild;
             for(let i = 0; i < payment.links.length; i++){
                 const link = payment.links[i];
                 if(link.method === 'REDIRECT'){
@@ -255,10 +316,18 @@ router.post('/checkout_action', (req, res, next) => {
 
             if(req.session.orderId){
                 // we have an order ID (probably from a failed/cancelled payment previosuly) so lets use that.
+                
+                if(req.session.isRebuild) {
+                  // assign order to rebuild
+                  db.rebuilds.updateOne({_id: common.getId(req.session.rebuildId)}, {$set: {
+                    orderId: common.getId(req.session.orderId),
+                    status: translateToRebuildStatus(payment.state)
+                  }}, {upsert: true})
+                }
 
                 // send the order to Paypal
                 res.redirect(redirectUrl);
-            }else{
+            } else{
                 // no order ID so we create a new one
                 db.orders.insertOne(orderDoc, (err, newDoc) => {
                     if(err){
@@ -270,6 +339,14 @@ router.post('/checkout_action', (req, res, next) => {
 
                     // set the order ID in the session
                     req.session.orderId = newId;
+
+                    if(req.session.isRebuild) {
+                      // assign order to rebuild
+                      db.rebuilds.updateOne({_id: common.getId(req.session.rebuildId)}, {$set: {
+                        orderId: common.getId(req.session.orderId),
+                        status: translateToRebuildStatus(payment.state)
+                      }}, {upsert: true})
+                    }
 
                     // send the order to Paypal
                     res.redirect(redirectUrl);

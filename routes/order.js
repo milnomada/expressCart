@@ -119,7 +119,7 @@ router.get('/admin/orders/filter/:search', restrict, async (req, res, next) => {
     });
 });
 
-// order product
+// delete order
 router.get('/admin/order/delete/:id', restrict, async(req, res) => {
     const db = req.app.db;
 

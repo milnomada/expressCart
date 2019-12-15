@@ -106,19 +106,25 @@
     </div>
     {{#ifCond page '==' 'pay'}}
     <div class="panel panel-default" style="margin-top: 30px;">
-      <div class="panel-heading">{{ @root.__ "Choose Payment" }}</div>
+      <div class="panel-heading">{{ @root.__ "Choose payment mode" }}</div>
       <div class="panel-body">
         {{#if @root.session.cart}}
         <div class="row">
           <div class="col-md-4 no-pad-right">
             <div class="payment-type" data-delayed="" data-id="">
-                <div class="title">Tarjeta crédito</div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="card" checked>
+                </div>
+                <div class="title">{{ @root.__ "Credit card" }}</div><br>
                 <div class="img-holder"><img src="/images/v_card.png" alt="Tarjeta bancaria"></div>
             </div>
           </div>
           <div class="col-md-4 no-pad-right">
             <div class="payment-type">
-                <div class="title">PayPal</div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="paypal">
+                </div>
+                <div class="title">{{ @root.__ "PayPal" }}</div><br>
                 <div class="img-holder"><img src="/images/v_paypal.png" alt="PayPal"></div>
             </div>
           </div>
@@ -126,19 +132,30 @@
         <div class="row">
           <div class="col-md-12 no-pad-right">
             <div class="payment-details" data-type="card" data-id="">
-                <div class="description">Insert credit card details:</div>
+                <hr>
+                <div class="description">{{ @root.__ "Insert credit card details" }}</div>
                 <div class="cc-box">
                   <div class="cc-item">
-                    <label for="cc-number" class="cc-label">Credit card number</label>
+                    <label for="cc-number" class="cc-label">{{ @root.__ "Credit card number" }}</label>
                     <input type="text" class="form-control cc-number" placeholder="1234 1234 1234 1234 1234" name="">
                   </div>
-                  <div class="cc-item"><input type="text" class="form-control cc-expires" name="" placeholder="MM / YYYY"></div>
-                  <div class="cc-item"><input type="text" class="form-control cc-cvc" placeholder="123" name=""></div>
+                  <div class="cc-item">
+                    <label for="cc-expires" class="cc-label">{{ @root.__ "Expire date" }}</label>
+                    <input type="text" class="form-control cc-expires" name="" placeholder="MM / YYYY"></div>
+                  <div class="cc-item">
+                    <label for="cc-cvc" class="cc-label">{{ @root.__ "Cvc" }}</label>
+                    <input type="text" class="form-control cc-cvc" placeholder="123" name=""></div>
+                  <div class="cc-item">
+                    <button type="" class="btn btn-success form-control cc-send" name="Send">{{ @root.__ "Pay" }}</div>
                 </div>
             </div>
             <div class="payment-details" data-type="paypal" id="checkout_paypal" >
-                <div class="payment-type">
-                  <div class="title">PayPal</div>
+                <hr>
+                <div class="description">
+                  {{{ @root.__ "redirection_html" }}}
+                </div>
+                <div class="payment-action" id="checkout_paypal">
+                  <div class="title">{{ @root.__ "Pay with" }}</div>
                   <div class="img-holder"><img src="/images/v_paypal.png" alt="PayPal"></div>
                 </div>
             </div>

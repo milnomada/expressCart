@@ -178,6 +178,14 @@
 	"Light": "Luce",
 	"Payments": "Modi di pagamento",
 	"Credit card": "Carta bancomat",
+
+  "Insert credit card details": "Inserisci i detagli de la carta",
+  "Credit card number": "Numero di carta",
+  "Expire date": "Scadenza",
+  "Pay with": "Pagare con",
+  "redirection_html": "<span>Si aprirá il sito Paypal per confirmare il pagamento</span><br><small>Una volta il pago sia stato confermato, si aprirá questa pagina di nuovo mostrando i detagli de la transazione</small>",
+  "Pay": "Pagare",
+
 	"Delivery": "Spedizione",
 	"Returns": "Divoluzioni",
 	"Conditions": "Condizioni",

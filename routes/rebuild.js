@@ -25,4 +25,40 @@ router.get('/admin/rebuilds', restrict, async (req, res, next) => {
     });
 });
 
+// delete order
+router.get('/admin/rebuild/delete/:id', restrict, async(req, res) => {
+    const db = req.app.db;
+
+    // remove the order
+    try{
+        await db.rebuilds.deleteOne({ _id: common.getId(req.params.id) });
+
+        if(req.apiAuthenticated){
+            res.status(200).json({
+                message: 'Order successfully deleted'
+            });
+            return;
+        }
+
+        // redirect home
+        req.session.message = 'Rebuild successfully deleted';
+        req.session.messageType = 'success';
+        res.redirect('/admin/rebuilds');
+
+    } catch(ex){
+        console.log('Cannot delete rebuild', ex);
+        if(req.apiAuthenticated){
+            res.status(200).json({
+                message: 'Error deleting rebuild'
+            });
+            return;
+        }
+
+        // redirect home
+        req.session.message = 'Error deleting rebuild';
+        req.session.messageType = 'danger';
+        res.redirect('/admin/rebuilds');
+    }
+});
+
 module.exports = router;

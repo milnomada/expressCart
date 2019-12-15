@@ -182,6 +182,11 @@
 	"Lamps": "Lamps",
 	"Payments": "Modos de pago",
 	"Credit card": "Tarjeta de crédito",
+	"Insert credit card details": "Introduce los datos de la tarjeta",
+	"Credit card number": "Número tarjeta de crédito",
+	"Expire date": "Caducidad",
+	"Pay with": "Pagar con",
+	"redirection_html": "<span>Se abrirá la página de Paypal para confirmar el pago</span><br><small>Una vez se haya completado el pago, se volverá a esta página, donde podrás ver los detalles de la transacción</small>",
 	"Delivery": "Envío",
 	"Returns": "Returns",
 	"Conditions": "Condiciones",
@@ -196,5 +201,9 @@
 	"Close": "Close",
 	"You can request a new rebuild of this piece": "You can request a new rebuild of this piece",
 	"It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy": "It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy",
-	"Send": "Send"
+	"Send": "Send",
+	"Choose payment mode": "Choose payment mode",
+	"PayPal": "PayPal",
+	"Cvc": "Cvc",
+	"Pay": "Pagar"
 }

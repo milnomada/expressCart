@@ -19,7 +19,8 @@ const {
     updateTotalCartAmount,
     updateSubscriptionCheck,
     getData,
-    addSitemapProducts
+    addSitemapProducts,
+    emptyCart
 } = require('../lib/common');
 
 const common = require('../lib/common');
@@ -366,12 +367,13 @@ router.post('/product/rebuild', checkLogin, async (req, res, next) => {
       const emailHtml = common.getRebuildTemplate(
         "articles", { 
           message: "You just ordered a rebuild of the following product",
+          showConfirmation: true,
           items: [product],
           hash: doc.signature
         }
       )
       common.sendEmail(
-        "milnomada@gmail.com",
+        doc.customerEmail,
         'Your rebuild request from ' + req.app.config.cartTitle,
         emailHtml
       );
@@ -408,7 +410,15 @@ router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
     return
   }
 
+  if(rebuild.status !== 0 && rebuild.status !== 1) {
+    console.log(colors.yellow("Rebuild already processed", rebuild))
 
+    req.session.message = 'Rebuild processed. Please request a new rebuild in the product page.';
+    req.session.messageType = 'danger';
+    
+    res.redirect('/');
+    return
+  }
 
   // load product into session,
   req.session.cart = []
@@ -416,7 +426,7 @@ router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
   req.session.cartTotalItems = rebuild.units;
 
   // this is not mongoose!
-  const product = await db.products.findOne({ _id: getId(rebuild.productId)} )
+  const product = await db.products.findOne({_id: getId(rebuild.productId)})
   if(!product) {
     console.log(colors.yellow("No product found", err, rebuild, product, getId(rebuild.productId)))
     res.redirect('/');
@@ -451,6 +461,10 @@ router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
   // merge into the current cart
   req.session.cart.push(productObj);
 
+  // Add rebuild data to session
+  req.session.isRebuild = true;
+  req.session.rebuildId = rebuild._id;
+
   // Update cart to the DB
   await db.cart.updateOne(
     { sessionId: req.session.id }, 
@@ -470,33 +484,6 @@ router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
   // redirect to pay
   res.redirect('/pay');
 });
-
-const emptyCart = async (req, res, type) => {
-    const db = req.app.db;
-
-    // Remove from session
-    delete req.session.cart;
-    delete req.session.orderId;
-
-    // Remove cart from DB
-    await db.cart.deleteOne({ sessionId: req.session.id });
-
-    // update total cart amount
-    updateTotalCartAmount(req, res);
-
-    // Update checking cart for subscription
-    updateSubscriptionCheck(req, res);
-
-    // If POST, return JSON else redirect nome
-    if(type === 'json'){
-        res.status(200).json({ message: 'Cart successfully emptied', totalCartItems: 0 });
-        return;
-    }
-
-    req.session.message = 'Cart successfully emptied.';
-    req.session.messageType = 'success';
-    res.redirect('/');
-};
 
 // Add item to cart
 router.post('/product/addtocart', async (req, res, next) => {
