@@ -167,7 +167,7 @@ handlebars = handlebars.create({
             }
             return handlebars.helpers.formatAmount(amt);
         },
-         getStatusRebuild: (status) => {
+        getStatusRebuild: (status) => {
             switch(status){
                 case 0:
                   return 'created'
@@ -180,29 +180,29 @@ handlebars = handlebars.create({
                 case 4:
                   return 'sent'
                 case 5:
-                  return 'cancellec'
+                  return 'cancelled'
             }
         },
-        getStatusColor: (status) => {
+        /* getStatusColor: (status) => {
             switch(status){
-                case'Paid':
-                    return'success';
-                case'Approved':
-                    return'success';
-                case'Approved - Processing':
-                    return'success';
-                case'Failed':
-                    return'danger';
-                case'Completed':
-                    return'success';
-                case'Shipped':
-                    return'success';
-                case'Pending':
-                    return'warning';
+                case 3: //'Paid':
+                    return 'success';
+                case 1: //'Approved':
+                    return 'success';
+                case 2: //'Approved - Processing':
+                    return 'success';
+                case 6: // 'Failed':
+                    return 'danger';
+                case 4: //'Completed':
+                    return 'success';
+                case 5: //'Shipped':
+                    return 'success';
+                case 0: //'Pending':
+                    return 'warning';
                 default:
-                    return'danger';
+                    return 'danger';
             }
-        },
+        }, */
         checkProductOptions: (opts) => {
             if(opts){
                 return'true';

@@ -343,10 +343,21 @@ input[type=number]::-webkit-outer-spin-button {
     padding-left: 0px;
     padding-right: 0px;
 }
+table.list-table th {
+  
+}
+table.list-table tr {
+  display: table-row;
+}
+table.list-table tr td {
+  padding: .75em;
+}
+table.list-table tr td i {
+  margin-right: .3em;
+}
 
 input:focus {
     outline: none;
-    background: #fbfbe9;
 }
 
 input + label {
@@ -438,6 +449,10 @@ a {
 .list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus {
     background-color: #000000;
     border-color: #000000;
+}
+
+.list-group {
+  list-style: none;
 }
 
 .navbar-default .navbar-brand {
