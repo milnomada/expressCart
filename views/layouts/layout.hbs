@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Wire+One|IBM+Plex+Sans+Condensed:300,400&display=swap" >
     <link rel="stylesheet" href="/stylesheets/codemirror-style.min.css">
     <link rel="stylesheet" href="/stylesheets/style{{config.env}}.css">
+    <link rel="stylesheet" href="/stylesheets/media.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/roundSlider/1.3.2/roundslider.min.css" />
     {{#if admin}}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.2/summernote.css" rel="stylesheet">
@@ -135,15 +136,13 @@
         {{/ifCond}}
       {{/unless}}
 	    <div class="container-fluid content-body" id="container">
-        <div class="row">
-          {{#if admin}}
-          <div class="col-xs-12 col s12">
-            {{{body}}}
-          </div>
-          {{else}}
+        {{#if admin}}
+        <div class="col-xs-12 col s12">
           {{{body}}}
-          {{/if}}
         </div>
+        {{else}}
+        {{{body}}}
+        {{/if}}
 	  </div>
 		<input type="hidden" id="input_notify_message" value="{{message}}">
 		<input type="hidden" id="input_notify_messageType" value="{{messageType}}">

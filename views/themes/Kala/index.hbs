@@ -43,81 +43,83 @@
                  <!-- </a> -->
               {{/if}}
               <div class="product-details" data-q="{{productStock}}" data-id="{{_id}}" data-sz="{{@root.images.length}}">
-                <h3 class="product-title product-title-home top-pad-10">
-                  {{this.productTitle}}
-                </h3>
-                {{#ifCond productDiscount '>' 0 }}
-                  <h3 class="product-price text-center">{{currencySymbol config.currencySymbol}}{{opCalc ../this.productPrice '%' ../this.productDiscount }} <span class="before">{{currencySymbol config.currencySymbol}}{{../this.productPrice}}</span></h3>
-                {{else}}
-                  <h3 class="product-price text-center">
-                    {{currencySymbol ../config.currencySymbol}}{{formatAmount ../this.productPrice}}
+                <div class="product-details-md">
+                  <h3 class="product-title product-title-home top-pad-10">
+                    {{this.productTitle}}
                   </h3>
-                {{/ifCond}}
-                <div class="col-md-12 hidden-xs body_text">
-                  <div class="description">{{{productDescription}}}</div>
-                </div>
-                {{#if uniqueProduct}}
-                  <div class="col-md-12 hidden-xs quantity">
-                    <hr />
-                    <p class="product-option-text"><s>{{ @root.__ "Quantity" }}</s></p>
-                    <strong><i class="fa fa-star-o"></i> {{ @root.__ "This product is a unique piece" }}</strong>
+                  {{#ifCond productDiscount '>' 0 }}
+                    <h3 class="product-price text-center">{{currencySymbol config.currencySymbol}}{{opCalc ../this.productPrice '%' ../this.productDiscount }} <span class="before">{{currencySymbol config.currencySymbol}}{{../this.productPrice}}</span></h3>
+                  {{else}}
+                    <h3 class="product-price text-center">
+                      {{currencySymbol ../config.currencySymbol}}{{formatAmount ../this.productPrice}}
+                    </h3>
+                  {{/ifCond}}
+                  <div class="col-md-12 hidden-xs body_text">
+                    <div class="description">{{{productDescription}}}</div>
                   </div>
-                {{else}}
-                  {{#ifCond productStock '>' 0 }}
-                  <div class="col-md-12 hidden-xs quantity">
-                    <h4 class="inline">{{ @root.__ "Quantity" }}</h4>
+                  {{#if uniqueProduct}}
+                    <div class="col-md-12 hidden-xs quantity">
+                      <hr />
+                      <p class="product-option-text"><s>{{ @root.__ "Quantity" }}</s></p>
+                      <strong><i class="fa fa-star-o"></i> {{ @root.__ "This product is a unique piece" }}</strong>
+                    </div>
+                  {{else}}
+                    {{#ifCond productStock '>' 0 }}
+                    <div class="col-md-12 hidden-xs quantity">
+                      <h4 class="inline">{{ @root.__ "Quantity" }}</h4>
+                      <div class="input-group">
+                          <span class="input-group-btn">
+                              <button class="btn btn-primary qty-btn-minus" type="button">-</button>
+                          </span>
+                          <input type="text" class="form-control add-color text-center" id="product_quantity" maxlength="3" value="1">
+                          <span class="input-group-btn">
+                            {{#ifCond productStock '==' 1 }}
+                              <button class="btn btn-primary nope" type="button">{{ @root.__ "Last item" }}</button>
+                            {{else}}
+                              <button class="btn btn-primary qty-btn-plus" type="button">+</button>
+                            {{/ifCond}}
+                          </span>
+                      </div>
+                    </div>
+                    {{/ifCond}}
+                  {{/if}}
+                  <div class="col-md-12 btnAddToCart">
+                    <input type="hidden" class="form-control" id="productId"  minlength="5" value="{{_id}}">
+                    {{#if productStock}}
+                      {{!-- TODO: I cound accept product stock == 0. For that fix form when product stock is 0 --}}
+                      {{#ifCond productStock '==' 0}}
+                        <button class="btn btn-primary btn-block product-rebuild" type="button">{{ @root.__ "Craft another like this" }}</button>
+                      {{else}}
+                        <button class="btn btn-primary btn-block product-add-to-cart" type="button">{{ @root.__ "Add to cart" }}</button>
+                      {{/ifCond}}
+                    {{else}}
+                      <button class="btn btn-primary btn-block product-rebuild" type="button">{{ @root.__ "Craft another like this" }}</button>
+                      
+                    {{/if}}
+                  </div>
+                  <div class="col-md-12 rebuild">
+                    <div class="text-right"><span class="hide-rebuild"><small>{{ @root.__ "Close" }}</small> <i class="fa fa-close "></i></span></div>
+                    <p class="product-option-text">
+                      {{ @root.__ "You can request a new rebuild of this piece" }} <br>
+                      {{ @root.__ "It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy" }}
+                    </p>
                     <div class="input-group">
-                        <span class="input-group-btn">
-                            <button class="btn btn-primary qty-btn-minus" type="button">-</button>
-                        </span>
-                        <input type="text" class="form-control add-color text-center" id="product_quantity" maxlength="3" value="1">
-                        <span class="input-group-btn">
-                          {{#ifCond productStock '==' 1 }}
-                            <button class="btn btn-primary nope" type="button">{{ @root.__ "Last item" }}</button>
-                          {{else}}
-                            <button class="btn btn-primary qty-btn-plus" type="button">+</button>
-                          {{/ifCond}}
-                        </span>
+                      <input type="email" class="form-control" name="email" minlength="5" placeholder="Email address" required>
+                      <input type="hidden" class="form-control" name="productId" minlength="5" value="{{_id}}">
+                      <span class="input-group-btn">
+                        <button class="btn btn-primary btn-block request-product-rebuild" type="button">{{ @root.__ "Send" }}</button>
+                      </span>
                     </div>
                   </div>
-                  {{/ifCond}}
-                {{/if}}
-                <div class="col-md-12 btnAddToCart">
-                  <input type="hidden" class="form-control" id="productId"  minlength="5" value="{{_id}}">
-                  {{#if productStock}}
-                    {{!-- TODO: I cound accept product stock == 0. For that fix form when product stock is 0 --}}
-                    {{#ifCond productStock '==' 0}}
-                      <button class="btn btn-primary btn-block product-rebuild" type="button">{{ @root.__ "Craft another like this" }}</button>
+                  {{!--
+                    {{#if productOptions}}
+                      <a class="btn btn-primary add-to-cart" data-id="{{this._id}}" data-link="{{this.productPermalink}}" data-has-options="{{checkProductOptions this.productOptions}}" role="button">{{ @root.__ "View" }}</a>
                     {{else}}
-                      <button class="btn btn-primary btn-block product-add-to-cart" type="button">{{ @root.__ "Add to cart" }}</button>
-                    {{/ifCond}}
-                  {{else}}
-                    <button class="btn btn-primary btn-block product-rebuild" type="button">{{ @root.__ "Craft another like this" }}</button>
-                    
-                  {{/if}}
+                      <a class="btn btn-primary add-to-cart" data-id="{{this._id}}" data-link="{{this.productPermalink}}" data-has-options="{{checkProductOptions this.productOptions}}" role="button">{{ @root.__ "Add to cart" }}</a>
+                    {{/if}}
+                  --}}
+                  <div id="slider"></div>
                 </div>
-                <div class="col-md-12 rebuild">
-                  <div class="text-right"><span class="hide-rebuild"><small>{{ @root.__ "Close" }}</small> <i class="fa fa-close "></i></span></div>
-                  <p class="product-option-text">
-                    {{ @root.__ "You can request a new rebuild of this piece" }} <br>
-                    {{ @root.__ "It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy" }}
-                  </p>
-                  <div class="input-group">
-                    <input type="email" class="form-control" name="email" minlength="5" placeholder="Email address" required>
-                    <input type="hidden" class="form-control" name="productId" minlength="5" value="{{_id}}">
-                    <span class="input-group-btn">
-                      <button class="btn btn-primary btn-block request-product-rebuild" type="button">{{ @root.__ "Send" }}</button>
-                    </span>
-                  </div>
-                </div>
-                {{!--
-                  {{#if productOptions}}
-                    <a class="btn btn-primary add-to-cart" data-id="{{this._id}}" data-link="{{this.productPermalink}}" data-has-options="{{checkProductOptions this.productOptions}}" role="button">{{ @root.__ "View" }}</a>
-                  {{else}}
-                     <a class="btn btn-primary add-to-cart" data-id="{{this._id}}" data-link="{{this.productPermalink}}" data-has-options="{{checkProductOptions this.productOptions}}" role="button">{{ @root.__ "Add to cart" }}</a>
-                  {{/if}}
-                --}}
-                <div id="slider"></div>
               </div>
             </div>
           </div>
