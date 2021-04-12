@@ -16,6 +16,7 @@ const {
   getMenu,
   getPaymentConfig,
   getImages,
+  getRebuildTemplate,
   updateTotalCartAmount,
   updateSubscriptionCheck,
   getData,
@@ -23,119 +24,7 @@ const {
   emptyCart
 } = require('../lib/common');
 
-const common = require('../lib/common');
-
-
-const enrichProduct = (product, rebuild) => {
-  // new product into session cart
-  const p = {};
-
-  p.productId = rebuild.productId;
-  p.title = product.productTitle;
-  p.quantity = rebuild.units;
-  p.uniqueProduct = product.uniqueProduct;
-  if (product.productDiscount && product.productDiscount > 0)
-    p.totalItemPrice = (product.productPrice - (product.productPrice / product.productDiscount)) * rebuild.units;
-  else
-    p.totalItemPrice = product.productPrice * rebuild.units;
-
-  p.options = product.productOptions;
-  p.productImage = product.productImage;
-  p.productDiscount = product.productDiscount;
-  p.productComment = product.productComment;
-  p.productSubscription = product.productSubscription;
-  p.rebuildId = rebuild._id;
-  if (product.productPermalink) {
-    p.link = product.productPermalink;
-  } else {
-    p.link = product._id;
-  }
-  return p
-}
-
-const productToSession = async (req, product) => {
-  // load product into session,
-  req.session.cart = []
-  // Doesnt exist so we add to the cart session
-  req.session.cartTotalItems = product.quantity;
-  // merge into the current cart
-  req.session.cart.push(product);
-
-  // Add rebuild data to session
-  req.session.isRebuild = true;
-  req.session.rebuildId = product.rebuildId;
-
-  // Update cart to the DB
-  await db.cart.updateOne(
-    { sessionId: req.session.id },
-    { $set: { cart: req.session.cart } },
-    { upsert: true }
-  );
-}
-
-const fetchProducts = async (req, res, fn) => {
-  const
-    config = req.app.config,
-    numberProducts = req.query.size ? req.query.size : config.productsPerPage,
-    offset = req.query.offset ? req.query.offset : (req.params.pageNum ? req.params.pageNum : 0)
-    ;
-  // Promise.all([getData(req, req.params.pageNum), getMenu(db)])
-  Promise.all([getData(req, offset, null, numberProducts)])
-    .then(([results]) => {
-      console.log(results)
-      // If JSON query param return json instead
-
-      Promise.all([getImages(results.data[0]._id, req, res)]).then(([images]) => {
-        console.log(images.length)
-        fn(null, { results: results, images: images })
-        /*res.render(`${config.themeViews}index`, {
-          title: 'Shop',
-          results: results.data,
-          images: images,
-          session: req.session,
-          message: clearSessionValue(req.session, 'message'),
-          messageType: clearSessionValue(req.session, 'messageType'),
-          metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
-          pageCloseBtn: showCartCloseBtn('page'),
-          config: req.app.config,
-          productsPerPage: numberProducts,
-          totalProductCount: results.totalProducts,
-          pageNum: req.params.pageNum,
-          paginateUrl: 'page',
-          helpers: req.handlebars.helpers,
-          showFooter: 'showFooter',
-          // menu: [sortMenu(menu)]
-        }); */
-      });
-    })
-    .catch((err) => {
-      console.error(colors.red('Error getting products for page', err));
-      fn(err, null)
-    });
-}
-
-const fetchProduct = async (req, res, id, fn) => {
-  console.log(id)
-  Promise.all([
-    req.app.db.products.findOne({ $or: [{ _id: getId(id) }, { productPermalink: id }] })
-  ])
-    .then(([product]) => {
-      Promise.all([getImages(product._id, req, res)]).then(([images]) => {
-        product.images = images
-        fn(null, product)
-      });
-    })
-    .catch((err) => {
-      console.error(colors.red('Error getting products for page', err));
-      fn(err, null)
-    });
-}
-
-const publicConfig = {
-  availableLanguages: "",
-  defaultLocale: "",
-  currencySymbol: ""
-}
+const { enrichProduct, productToSession, fetchProducts, fetchProduct, publicConfig } = require('../lib/product');
 
 
 router.get('/cart/empty', async (req, res, next) => {
@@ -156,426 +45,8 @@ router.get('/cart/partial', (req, res) => {
   });
 });
 
-// Remove single product from cart
-router.post('/cart/remove/product', async (req, res, next) => {
-  const db = req.app.db;
-  let itemRemoved = false;
-
-  // remove item from cart
-  req.session.cart.forEach((item) => {
-    if (item) {
-      if (item.productId === req.body.cartId) {
-        itemRemoved = true;
-        req.session.cart = _.pull(req.session.cart, item);
-      }
-    }
-  });
-
-  // Update cart in DB
-  await db.cart.updateOne({ sessionId: req.session.id }, {
-    $set: { cart: req.session.cart }
-  });
-  // update total cart amount
-  updateTotalCartAmount(req, res);
-
-  // Update checking cart for subscription
-  updateSubscriptionCheck(req, res);
-
-  if (itemRemoved === false) {
-    return res.status(400).json({ message: 'Product not found in cart' });
-  }
-  return res.status(200).json({ message: 'Product successfully removed', totalCartItems: Object.keys(req.session.cart).length });
-});
-
-// Updates a single product quantity
-router.post('/cart/update', (req, res, next) => {
-  const db = req.app.db;
-  const config = req.app.config;
-  const cartItems = JSON.parse(req.body.items);
-  let hasError = false;
-  let stockError = false;
-
-  async.eachSeries(cartItems, async (cartItem, callback) => {
-    const productQuantity = cartItem.itemQuantity ? cartItem.itemQuantity : 1;
-    if (cartItem.itemQuantity === 0) {
-      // quantity equals zero so we remove the item
-      req.session.cart.splice(cartItem.cartIndex, 1);
-      callback(null);
-    } else {
-      const product = await db.products.findOne({ _id: getId(cartItem.productId) });
-      if (product) {
-        // If stock management on check there is sufficient stock for this product
-        if (config.trackStock) {
-          if (productQuantity > product.productStock) {
-            hasError = true;
-            stockError = true;
-            callback(null);
-            return;
-          }
-        }
-
-        const productPrice = parseFloat(product.productPrice).toFixed(2);
-        if (req.session.cart[cartItem.cartIndex]) {
-          req.session.cart[cartItem.cartIndex].quantity = productQuantity;
-          req.session.cart[cartItem.cartIndex].totalItemPrice = productPrice * productQuantity;
-          callback(null);
-        }
-      } else {
-        hasError = true;
-        callback(null);
-      }
-    }
-  }, async () => {
-    // update total cart amount
-    updateTotalCartAmount(req, res);
-    // Update checking cart for subscription
-    updateSubscriptionCheck(req, res);
-    // Update cart to the DB
-    await db.cart.updateOne({ sessionId: req.session.id }, {
-      $set: { cart: req.session.cart }
-    });
-
-    // show response
-    if (hasError === false) {
-      res.status(200).json({ message: 'Cart successfully updated', totalCartItems: Object.keys(req.session.cart).length });
-    } else {
-      if (stockError) {
-        res.status(400).json({ message: 'There is insufficient stock of this product.', totalCartItems: Object.keys(req.session.cart).length });
-      } else {
-        res.status(400).json({ message: 'There was an error updating the cart', totalCartItems: Object.keys(req.session.cart).length });
-      }
-    }
-  });
-});
-
-
-router.get('/checkout', async (req, res, next) => {
-  const config = req.app.config;
-
-  // if there is no items in the cart then render a failure
-  if (!req.session.cart) {
-    req.session.message = 'The are no items in your cart. Please add some items before checking out';
-    req.session.messageType = 'danger';
-    res.redirect('/');
-    return;
-  }
-
-  // render the checkout
-  res.render(`${config.themeViews}checkout`, {
-    title: 'Checkout',
-    config: req.app.config,
-    session: req.session,
-    pageCloseBtn: showCartCloseBtn('checkout'),
-    checkout: 'hidden',
-    page: 'checkout',
-    message: clearSessionValue(req.session, 'message'),
-    messageType: clearSessionValue(req.session, 'messageType'),
-    helpers: req.handlebars.helpers,
-    showFooter: 'showFooter'
-  });
-});
-
-
-router.get('/pay', async (req, res, next) => {
-  const config = req.app.config;
-
-  // if there is no items in the cart then render a failure
-  if (!req.session.cart) {
-    req.session.message = 'The are no items in your cart. Please add some items before checking out';
-    req.session.messageType = 'danger';
-    res.redirect('/checkout');
-    return;
-  }
-
-  let paymentType = '';
-  if (req.session.cartSubscription) {
-    paymentType = '_subscription';
-  }
-
-  // render the payment page
-  res.render(`${config.themeViews}pay`, {
-    title: 'Pay',
-    config: req.app.config,
-    paymentConfig: getPaymentConfig(),
-    pageCloseBtn: showCartCloseBtn('pay'),
-    session: req.session,
-    paymentPage: true,
-    paymentType,
-    page: 'pay',
-    message: clearSessionValue(req.session, 'message'),
-    messageType: clearSessionValue(req.session, 'messageType'),
-    helpers: req.handlebars.helpers,
-    showFooter: 'showFooter'
-  });
-});
-
-// These is the customer facing routes
-router.get('/payment/:orderId', async (req, res, next) => {
-  const db = req.app.db;
-  const config = req.app.config;
-
-  // Get the order
-  const order = await db.orders.findOne({ _id: getId(req.params.orderId) });
-  if (!order) {
-    res.render('error', { title: 'Not found', message: 'Order not found', helpers: req.handlebars.helpers, config });
-    return;
-  }
-
-  // If stock management is turned on payment approved update stock level
-  if (config.trackStock && req.session.paymentApproved) {
-    order.orderProducts.forEach(async (product) => {
-      const dbProduct = await db.products.findOne({ _id: getId(product.productId) });
-      let newStockLevel = dbProduct.productStock - product.quantity;
-      if (newStockLevel < 1) {
-        newStockLevel = 0;
-      }
-
-      // Update product stock
-      await db.products.updateOne({
-        _id: getId(product.productId)
-      }, {
-        $set: {
-          productStock: newStockLevel
-        }
-      }, { multi: false });
-    });
-  }
-
-  // If hooks are configured, send hook
-  if (config.orderHook) {
-    await hooker(order);
-  };
-
-  res.render(`${config.themeViews}payment_complete`, {
-    title: 'Payment complete',
-    config: req.app.config,
-    session: req.session,
-    pageCloseBtn: showCartCloseBtn('payment'),
-    result: order,
-    message: clearSessionValue(req.session, 'message'),
-    messageType: clearSessionValue(req.session, 'messageType'),
-    helpers: req.handlebars.helpers,
-    showFooter: 'showFooter',
-    menu: sortMenu(await getMenu(db))
-  });
-});
-
-// test
-router.post('/product/sendme', (req, res, next) => {
-  console.log(req.body)
-
-  const db = req.app.db;
-
-  db.products.findOne({ _id: getId(req.body.productId) }, function (err, data) {
-    if (!data || err) {
-      res.json({ status: 'error', message: 'Product not found' });
-      return;
-    }
-    if (data.productPublished === false) {
-      res.json({ status: 'error', message: 'Product not found' });
-      return;
-    }
-    const emailHtml = common.getRebuildTemplate(
-      "articles", {
-      message: "You just ordered a rebuild of the following product",
-      items: [data],
-      hash: "hash-here"
-    }
-    )
-    common.sendEmail(
-      "milnomada@gmail.com",
-      'Your payment with ' + req.app.config.cartTitle,
-      emailHtml
-    );
-    res.status(200).json({})
-  });
-});
-
-// show an individual product
-router.get(['/product/:id'], async (req, res) => {
-  const db = req.app.db;
-  const config = req.app.config;
-
-  const product = await db.products.findOne({ $or: [{ _id: getId(req.params.id) }, { productPermalink: req.params.id }] });
-  if (!product) {
-    res.render('error', { title: 'Not found', message: 'Order not found', helpers: req.handlebars.helpers, config });
-    return;
-  }
-  if (product.productPublished === false) {
-    res.render('error', { title: 'Not found', message: 'Product not found', helpers: req.handlebars.helpers, config });
-    return;
-  }
-  const productOptions = product.productOptions;
-  const totalProductCount = await db.products.count({ productPublished: true })
-
-  // If JSON query param return json instead
-  if (req.query.json === 'true') {
-    res.status(200).json(product);
-    return;
-  }
-
-  // show the view
-  const images = await getImages(product._id, req, res);
-
-  console.log(product)
-
-  res.render(`${config.themeViews}product`, {
-    title: product.productTitle,
-    result: product,
-    pageNum: product.productPermalink.slice(-1),
-    productOptions: productOptions,
-    images: images,
-    productDescription: product.productDescription,
-    metaDescription: config.cartTitle + ' - ' + product.productTitle,
-    pageCloseBtn: showCartCloseBtn('product'),
-    config: config,
-    session: req.session,
-    pageUrl: config.baseUrl + req.originalUrl,
-    message: clearSessionValue(req.session, 'message'),
-    messageType: clearSessionValue(req.session, 'messageType'),
-    helpers: req.handlebars.helpers,
-    showFooter: 'showFooter',
-    totalProductCount: totalProductCount,
-    menu: sortMenu(await getMenu(db))
-  });
-});
-
-// Totally empty the cart
-/*
-Deprecated in favour of /cart/empty and $.ajax Content-Type headers
-```js
-  $.ajax({
-      method: 'POST',
-      url: '/cart/empty',
-      beforeSend: function(xhr) {
-          xhr.setRequestHeader("Content-Type", "application/json");
-      }
-  })
-```
-
-router.post('/product/cart/empty', async (req, res, next) => {
-  emptyCart(req, res, 'json');
-});
-*/
-
-// Craft another like this feature
-router.post('/product/rebuild', checkLogin, async (req, res, next) => {
-
-  if (!req.apiAuthenticated) {
-    res.status(401).json({ error: "Unauthorized" });
-    return
-  }
-
-  var productId = req.body.productId,
-    email = req.body.email,
-    db = req.app.db,
-    buffer = crypto.randomBytes(48)
-    ;
-
-  const doc = {
-    productId: req.body.productId,
-    customerEmail: email,
-    units: 1,   // TODO: get this value from the rebuild form
-    signature: buffer.toString('hex'),
-    created: new Date(),
-    status: 0
-  };
-
-  // Validate the body again schema
-  const schemaResult = validateJson('newRebuild', doc);
-  if (!schemaResult.valid)
-    // If API request, return json
-    res.status(400).json(schemaResult.errors);
-  else {
-    try {
-      const saved = await db.rebuilds.insertOne(doc);
-      const product = await db.products.findOne({ _id: getId(req.body.productId) })
-      // get the new ID
-      const newId = saved.insertedId;
-
-      // Render email
-      const emailHtml = common.getRebuildTemplate(
-        "articles", {
-        message: "You just ordered a rebuild of the following product",
-        showConfirmation: true,
-        items: [product],
-        hash: doc.signature
-      }
-      )
-      common.sendEmail(
-        doc.customerEmail,
-        'Your rebuild request from ' + req.app.config.cartTitle,
-        emailHtml
-      );
-
-      res.status(201).json({ status: 'ok', message: 'email sent' });
-      // Send email to admin (explain reprint) let's see
-
-    } catch (e) {
-      console.log(colors.red('Error inserting document: ' + e));
-      res.status(400).json({ error: 'Error inserting document' });
-    }
-  }
-});
-
-// Craft another like this feature
-router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
-
-  var productId = req.body.productId,
-    email = req.body.email,
-    db = req.app.db,
-    buffer = crypto.randomBytes(48)
-    ;
-
-  const doc = {
-    signature: req.params.hash
-  }
-
-  // Set Status Confirmed
-  const rebuild = await db.rebuilds.findOne(doc) // {$set: {status: 1}}, (err, rebuild) => {
-
-  if (!rebuild) {
-    console.log(colors.yellow("No rebuild found", err, rebuild))
-    res.redirect('/');
-    return
-  }
-
-  if (rebuild.status !== 0 && rebuild.status !== 1) {
-    console.log(colors.yellow("Rebuild already processed", rebuild))
-
-    req.session.message = 'Rebuild processed. Please request a new rebuild in the product page.';
-    req.session.messageType = 'danger';
-
-    res.redirect('/');
-    return
-  }
-
-  // this is not mongoose!
-  var product = await db.products.findOne({ _id: getId(rebuild.productId) })
-  if (!product) {
-    console.log(colors.yellow("No product found", err, rebuild, product, getId(rebuild.productId)))
-    res.redirect('/');
-    return
-  }
-
-  // confirm rebuild
-  await db.rebuilds.updateOne({ signature: rebuild.signature }, { $set: { status: 1 } }, { upsert: true })
-
-  // Reuse session product with rebuild details
-  product = enrichProduct(product, rebuild);
-  productToSession(req, product)
-  updateTotalCartAmount(req, res);
-
-  // update total products in the shopping cart
-  req.session.cartTotalItems = req.session.cart.reduce((a, b) => +a + +b.quantity, 0);
-  req.session.user = null
-
-  // redirect to pay
-  res.redirect('/pay');
-});
-
 // Add item to cart
-router.post('/product/addtocart', async (req, res, next) => {
+router.post('/cart/product', async (req, res, next) => {
   const db = req.app.db;
   const config = req.app.config;
   let productQuantity = req.body.productQuantity ? parseInt(req.body.productQuantity) : 1;
@@ -716,6 +187,407 @@ router.post('/product/addtocart', async (req, res, next) => {
   // update how many products in the shopping cart
   req.session.cartTotalItems = req.session.cart.reduce((a, b) => +a + +b.quantity, 0);
   return res.status(200).json({ message: 'Cart successfully updated', totalCartItems: req.session.cartTotalItems });
+});
+
+// Remove single product from cart
+router.delete('/cart/product', async (req, res, next) => {
+  const db = req.app.db;
+  let itemRemoved = false;
+
+  // remove item from cart
+  req.session.cart.forEach((item) => {
+    if (item) {
+      if (item.productId === req.body.cartId) {
+        itemRemoved = true;
+        req.session.cart = _.pull(req.session.cart, item);
+      }
+    }
+  });
+
+  // Update cart in DB
+  await db.cart.updateOne({ sessionId: req.session.id }, {
+    $set: { cart: req.session.cart }
+  });
+  // update total cart amount
+  updateTotalCartAmount(req, res);
+
+  // Update checking cart for subscription
+  updateSubscriptionCheck(req, res);
+
+  if (itemRemoved === false) {
+    return res.status(400).json({ message: 'Product not found in cart' });
+  }
+  return res.status(200).json({ message: 'Product successfully removed', totalCartItems: Object.keys(req.session.cart).length });
+});
+
+// Updates a single product quantity
+router.post('/cart/update', (req, res, next) => {
+  const db = req.app.db;
+  const config = req.app.config;
+  const cartItems = JSON.parse(req.body.items);
+  let hasError = false;
+  let stockError = false;
+
+  async.eachSeries(cartItems, async (cartItem, callback) => {
+    const productQuantity = cartItem.itemQuantity ? cartItem.itemQuantity : 1;
+    if (cartItem.itemQuantity === 0) {
+      // quantity equals zero so we remove the item
+      req.session.cart.splice(cartItem.cartIndex, 1);
+      callback(null);
+    } else {
+      const product = await db.products.findOne({ _id: getId(cartItem.productId) });
+      if (product) {
+        // If stock management on check there is sufficient stock for this product
+        if (config.trackStock) {
+          if (productQuantity > product.productStock) {
+            hasError = true;
+            stockError = true;
+            callback(null);
+            return;
+          }
+        }
+
+        const productPrice = parseFloat(product.productPrice).toFixed(2);
+        if (req.session.cart[cartItem.cartIndex]) {
+          req.session.cart[cartItem.cartIndex].quantity = productQuantity;
+          req.session.cart[cartItem.cartIndex].totalItemPrice = productPrice * productQuantity;
+          callback(null);
+        }
+      } else {
+        hasError = true;
+        callback(null);
+      }
+    }
+  }, async () => {
+    // update total cart amount
+    updateTotalCartAmount(req, res);
+    // Update checking cart for subscription
+    updateSubscriptionCheck(req, res);
+    // Update cart to the DB
+    await db.cart.updateOne({ sessionId: req.session.id }, {
+      $set: { cart: req.session.cart }
+    });
+
+    // show response
+    if (hasError === false) {
+      res.status(200).json({ message: 'Cart successfully updated', totalCartItems: Object.keys(req.session.cart).length });
+    } else {
+      if (stockError) {
+        res.status(400).json({ message: 'There is insufficient stock of this product.', totalCartItems: Object.keys(req.session.cart).length });
+      } else {
+        res.status(400).json({ message: 'There was an error updating the cart', totalCartItems: Object.keys(req.session.cart).length });
+      }
+    }
+  });
+});
+
+
+router.get('/checkout', async (req, res, next) => {
+  const config = req.app.config;
+
+  // if there is no items in the cart then render a failure
+  if (!req.session.cart) {
+    req.session.message = 'The are no items in your cart. Please add some items before checking out';
+    req.session.messageType = 'danger';
+    res.redirect('/');
+    return;
+  }
+
+  // render the checkout
+  res.render(`${config.themeViews}checkout`, {
+    title: 'Checkout',
+    // TODO: remove or filter config
+    config: req.app.config,
+    session: req.session,
+    pageCloseBtn: showCartCloseBtn('checkout'),
+    checkout: 'hidden',
+    page: 'checkout',
+    message: clearSessionValue(req.session, 'message'),
+    messageType: clearSessionValue(req.session, 'messageType'),
+    helpers: req.handlebars.helpers,
+    showFooter: 'showFooter'
+  });
+});
+
+
+router.get('/pay', async (req, res, next) => {
+  const config = req.app.config;
+
+  // if there is no items in the cart then render a failure
+  if (!req.session.cart) {
+    req.session.message = 'The are no items in your cart. Please add some items before checking out';
+    req.session.messageType = 'danger';
+    res.redirect('/checkout');
+    return;
+  }
+
+  let paymentType = '';
+  if (req.session.cartSubscription) {
+    paymentType = '_subscription';
+  }
+
+  // render the payment page
+  res.render(`${config.themeViews}pay`, {
+    title: 'Pay',
+    config: req.app.config,
+    paymentConfig: getPaymentConfig(),
+    pageCloseBtn: showCartCloseBtn('pay'),
+    session: req.session,
+    paymentPage: true,
+    paymentType,
+    page: 'pay',
+    message: clearSessionValue(req.session, 'message'),
+    messageType: clearSessionValue(req.session, 'messageType'),
+    helpers: req.handlebars.helpers,
+    showFooter: 'showFooter'
+  });
+});
+
+// These is the customer facing routes
+router.get('/payment/:orderId', async (req, res, next) => {
+  const db = req.app.db;
+  const config = req.app.config;
+
+  // Get the order
+  const order = await db.orders.findOne({ _id: getId(req.params.orderId) });
+  if (!order) {
+    res.render('error', { title: 'Not found', message: 'Order not found', helpers: req.handlebars.helpers, config });
+    return;
+  }
+
+  // If stock management is turned on payment approved update stock level
+  if (config.trackStock && req.session.paymentApproved) {
+    order.orderProducts.forEach(async (product) => {
+      const dbProduct = await db.products.findOne({ _id: getId(product.productId) });
+      let newStockLevel = dbProduct.productStock - product.quantity;
+      if (newStockLevel < 1) {
+        newStockLevel = 0;
+      }
+
+      // Update product stock
+      await db.products.updateOne({
+        _id: getId(product.productId)
+      }, {
+        $set: {
+          productStock: newStockLevel
+        }
+      }, { multi: false });
+    });
+  }
+
+  // If hooks are configured, send hook
+  if (config.orderHook) {
+    await hooker(order);
+  };
+
+  res.render(`${config.themeViews}payment_complete`, {
+    title: 'Payment complete',
+    config: req.app.config,
+    session: req.session,
+    pageCloseBtn: showCartCloseBtn('payment'),
+    result: order,
+    message: clearSessionValue(req.session, 'message'),
+    messageType: clearSessionValue(req.session, 'messageType'),
+    helpers: req.handlebars.helpers,
+    showFooter: 'showFooter',
+    menu: sortMenu(await getMenu(db))
+  });
+});
+
+// test
+router.post('/product/sendme', (req, res, next) => {
+  console.log(req.body)
+
+  const db = req.app.db;
+
+  db.products.findOne({ _id: getId(req.body.productId) }, function (err, data) {
+    if (!data || err) {
+      res.json({ status: 'error', message: 'Product not found' });
+      return;
+    }
+    if (data.productPublished === false) {
+      res.json({ status: 'error', message: 'Product not found' });
+      return;
+    }
+    const emailHtml = getRebuildTemplate(
+      "articles", {
+      message: "You just ordered a rebuild of the following product",
+      items: [data],
+      hash: "hash-here"
+    }
+    )
+    sendEmail(
+      "milnomada@gmail.com",
+      'Your payment with ' + req.app.config.cartTitle,
+      emailHtml
+    );
+    res.status(200).json({})
+  });
+});
+
+// show an individual product
+router.get(['/product/:id'], async (req, res) => {
+  const db = req.app.db;
+  const config = req.app.config;
+
+  const product = await db.products.findOne({ $or: [{ _id: getId(req.params.id) }, { productPermalink: req.params.id }] });
+  if (!product) {
+    res.render('error', { title: 'Not found', message: 'Order not found', helpers: req.handlebars.helpers, config });
+    return;
+  }
+  if (product.productPublished === false) {
+    res.render('error', { title: 'Not found', message: 'Product not found', helpers: req.handlebars.helpers, config });
+    return;
+  }
+  const productOptions = product.productOptions;
+  const totalProductCount = await db.products.count({ productPublished: true })
+
+  // If JSON query param return json instead
+  if (req.query.json === 'true') {
+    res.status(200).json(product);
+    return;
+  }
+
+  // show the view
+  const images = await getImages(product._id, req, res);
+
+  console.log(product)
+
+  res.render(`${config.themeViews}product`, {
+    title: product.productTitle,
+    result: product,
+    pageNum: product.productPermalink.slice(-1),
+    productOptions: productOptions,
+    images: images,
+    productDescription: product.productDescription,
+    metaDescription: config.cartTitle + ' - ' + product.productTitle,
+    pageCloseBtn: showCartCloseBtn('product'),
+    config: config,
+    session: req.session,
+    pageUrl: config.baseUrl + req.originalUrl,
+    message: clearSessionValue(req.session, 'message'),
+    messageType: clearSessionValue(req.session, 'messageType'),
+    helpers: req.handlebars.helpers,
+    showFooter: 'showFooter',
+    totalProductCount: totalProductCount,
+    menu: sortMenu(await getMenu(db))
+  });
+});
+
+// Craft another like this feature
+router.post('/product/rebuild', checkLogin, async (req, res, next) => {
+
+  if (!req.apiAuthenticated) {
+    res.status(401).json({ error: "Unauthorized" });
+    return
+  }
+
+  var productId = req.body.productId,
+    email = req.body.email,
+    db = req.app.db,
+    buffer = crypto.randomBytes(48)
+    ;
+
+  const doc = {
+    productId: req.body.productId,
+    customerEmail: email,
+    units: 1,   // TODO: get this value from the rebuild form
+    signature: buffer.toString('hex'),
+    created: new Date(),
+    status: 0
+  };
+
+  // Validate the body again schema
+  const schemaResult = validateJson('newRebuild', doc);
+  if (!schemaResult.valid)
+    // If API request, return json
+    res.status(400).json(schemaResult.errors);
+  else {
+    try {
+      const saved = await db.rebuilds.insertOne(doc);
+      const product = await db.products.findOne({ _id: getId(req.body.productId) })
+      // get the new ID
+      const newId = saved.insertedId;
+
+      // Render email
+      const emailHtml = getRebuildTemplate(
+        "articles", {
+        message: "You just ordered a rebuild of the following product",
+        showConfirmation: true,
+        items: [product],
+        hash: doc.signature
+      }
+      )
+      sendEmail(
+        doc.customerEmail,
+        'Your rebuild request from ' + req.app.config.cartTitle,
+        emailHtml
+      );
+
+      res.status(201).json({ status: 'ok', message: 'email sent' });
+      // Send email to admin (explain reprint) let's see
+
+    } catch (e) {
+      console.log(colors.red('Error inserting document: ' + e));
+      res.status(400).json({ error: 'Error inserting document' });
+    }
+  }
+});
+
+// Craft another like this feature
+router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
+
+  var productId = req.body.productId,
+    email = req.body.email,
+    db = req.app.db,
+    buffer = crypto.randomBytes(48)
+    ;
+
+  const doc = {
+    signature: req.params.hash
+  }
+
+  // Set Status Confirmed
+  const rebuild = await db.rebuilds.findOne(doc) // {$set: {status: 1}}, (err, rebuild) => {
+
+  if (!rebuild) {
+    console.log(colors.yellow("No rebuild found", err, rebuild))
+    res.redirect('/');
+    return
+  }
+
+  if (rebuild.status !== 0 && rebuild.status !== 1) {
+    console.log(colors.yellow("Rebuild already processed", rebuild))
+
+    req.session.message = 'Rebuild processed. Please request a new rebuild in the product page.';
+    req.session.messageType = 'danger';
+
+    res.redirect('/');
+    return
+  }
+
+  // this is not mongoose!
+  var product = await db.products.findOne({ _id: getId(rebuild.productId) })
+  if (!product) {
+    console.log(colors.yellow("No product found", err, rebuild, product, getId(rebuild.productId)))
+    res.redirect('/');
+    return
+  }
+
+  // confirm rebuild
+  await db.rebuilds.updateOne({ signature: rebuild.signature }, { $set: { status: 1 } }, { upsert: true })
+
+  // Reuse session product with rebuild details
+  product = enrichProduct(product, rebuild);
+  productToSession(req, product)
+  updateTotalCartAmount(req, res);
+
+  // update total products in the shopping cart
+  req.session.cartTotalItems = req.session.cart.reduce((a, b) => +a + +b.quantity, 0);
+  req.session.user = null
+
+  // redirect to pay
+  res.redirect('/pay');
 });
 
 // search products
@@ -949,9 +821,6 @@ router.get(['/page/:pageNum', '/lamp/:pageNum'], (req, res, next) => {
   }); */
 });
 
-/**
- * dev
- */
 
 router.get('/api/lamp', (req, res, next) => {
 
@@ -1104,5 +973,6 @@ router.get('/:page?', async (req, res, next) => {
     }
   }
 });
+
 
 module.exports = router;

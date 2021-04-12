@@ -922,7 +922,7 @@ $(document).ready(function(){
 
         $.ajax({
             method: 'POST',
-            url: '/product/addtocart',
+            url: '/cart/product',
             data: {
                 productId: $('#productId').val(),
                 productQuantity: $('#product_quantity').val(),
@@ -998,7 +998,7 @@ $(document).ready(function(){
         } else {
             $.ajax({
                 method: 'POST',
-                url: '/product/addtocart',
+                url: '/cart/product',
                 data: { productId: $(this).attr('data-id') }
             })
             .done(function(msg){

@@ -21,7 +21,7 @@ test('[Success] Get products JSON', async t => {
 
 test('[Success] Add subscripton product to cart', async t => {
     const res = await g.request
-        .post('/product/addtocart')
+        .post('/cart/product')
         .send({
             productId: g.products[7]._id,
             productQuantity: 1,
@@ -37,7 +37,7 @@ test('[Success] Add subscripton product to cart', async t => {
 
 test('[Fail] Add product to cart when subscription already added', async t => {
     const res = await g.request
-        .post('/product/addtocart')
+        .post('/cart/product')
         .send({
             productId: g.products[1]._id,
             productQuantity: 100,
@@ -59,7 +59,7 @@ test('[Success] Empty cart', async t => {
 
 test('[Success] Add product to cart', async t => {
     const res = await g.request
-        .post('/product/addtocart')
+        .post('/cart/product')
         .send({
             productId: g.products[0]._id,
             productQuantity: 1,
@@ -75,7 +75,7 @@ test('[Success] Add product to cart', async t => {
 
 test('[Fail] Cannot add subscripton when other product in cart', async t => {
     const res = await g.request
-        .post('/product/addtocart')
+        .post('/cart/product')
         .send({
             productId: g.products[7]._id,
             productQuantity: 1,
@@ -87,7 +87,7 @@ test('[Fail] Cannot add subscripton when other product in cart', async t => {
 
 test('[Fail] Add product to cart with not enough stock', async t => {
     const res = await g.request
-        .post('/product/addtocart')
+        .post('/cart/product')
         .send({
             productId: g.products[0]._id,
             productQuantity: 100,
@@ -99,7 +99,7 @@ test('[Fail] Add product to cart with not enough stock', async t => {
 
 test('[Fail] Add incorrect product to cart', async t => {
     const res = await g.request
-        .post('/product/addtocart')
+        .post('/cart/product')
         .send({
             id: 'fake_product_id',
             state: false
@@ -110,20 +110,21 @@ test('[Fail] Add incorrect product to cart', async t => {
 
 test('[Success] Remove item previously added to cart', async t => {
     const res = await g.request
-        .post('/cart/remove/product')
-        .send({
-            cartId: g.products[0]._id
-        })
+        .delete('/cart/product/' + g.products[0]._id)
+        //.send({
+        //    cartId: g.products[0]._id
+        //})
         .expect(200);
     t.deepEqual(res.body.message, 'Product successfully removed');
 });
 
 test('[Fail] Try remove an item which is not in the cart', async t => {
     const res = await g.request
-        .post('/cart/remove/product')
-        .send({
-            cartId: 'bogus_product_id'
         })
+        .delete('/cart/product/' + 'bogus_product_id')
+        //.send({
+        //    cartId: g.products[0]._id
+        //})
         .expect(400);
     t.deepEqual(res.body.message, 'Product not found in cart');
 });
