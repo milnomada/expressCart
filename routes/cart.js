@@ -14,9 +14,13 @@ const {
   
 
 router.get('/cart/empty', async (req, res, next) => {
-    emptyCart(req, res, req.headers["Content-Type"] === "application/json" ? "json" : "");
+    emptyCart(req, res, req.headers["Content-Type".toLowerCase()] === "application/json" ? "json" : "");
 });
 
+router.post('/cart/empty', async (req, res, next) => {
+    console.log(req.headers)
+    emptyCart(req, res, req.headers["Content-Type".toLowerCase()] === "application/json" ? "json" : "");
+});
 
 router.get('/cart/partial', (req, res) => {
     const config = req.app.config;
