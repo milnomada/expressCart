@@ -65,6 +65,7 @@ switch(config.paymentGateway){
 
 // require the routes
 const index = require('./routes/index');
+const cart = require('./routes/cart');
 const admin = require('./routes/admin');
 const product = require('./routes/product');
 const customer = require('./routes/customer');
@@ -362,6 +363,7 @@ app.use((req, res, next) => {
 
 // setup the routes
 app.use('/', index);
+app.use('/', cart);
 app.use('/', customer);
 app.use('/', product);
 app.use('/', order);
