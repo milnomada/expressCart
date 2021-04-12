@@ -1,13 +1,14 @@
 const express = require('express');
-const common = require('../lib/common');
-const { restrict, checkAccess } = require('../lib/auth');
-const { indexProducts } = require('../lib/indexing');
-const { validateJson } = require('../lib/schema');
+const common = require('../../lib/common');
+const { restrict, checkAccess } = require('../../lib/auth');
+const { indexProducts } = require('../../lib/indexing');
+const { validateJson } = require('../../lib/schema');
 const colors = require('colors');
 const rimraf = require('rimraf');
 const fs = require('fs');
 const path = require('path');
 const router = express.Router();
+
 
 router.get('/admin/products', restrict, async (req, res, next) => {
     const db = req.app.db;

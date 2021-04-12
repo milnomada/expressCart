@@ -1,6 +1,6 @@
 const express = require('express');
-const common = require('../lib/common');
-const { restrict } = require('../lib/auth');
+const common = require('../../lib/common');
+const { restrict } = require('../../lib/auth');
 const colors = require('colors');
 const bcrypt = require('bcryptjs');
 const router = express.Router();

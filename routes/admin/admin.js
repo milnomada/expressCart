@@ -1,6 +1,6 @@
 const express = require('express');
-const common = require('../lib/common');
-const { restrict, checkAccess } = require('../lib/auth');
+const common = require('../../lib/common');
+const { restrict, checkAccess } = require('../../lib/auth');
 const escape = require('html-entities').AllHtmlEntities;
 const colors = require('colors');
 const bcrypt = require('bcryptjs');
@@ -51,7 +51,7 @@ router.get('/admin/login', async (req, res) => {
 });
 
 // login the user and check the password
-router.post('/admin/login_action', async (req, res) => {
+router.post('/admin/login', async (req, res) => {
     const db = req.app.db;
 
     const user = await db.users.findOne({ userEmail: common.mongoSanitize(req.body.email) });

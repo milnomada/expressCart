@@ -1,7 +1,7 @@
 const express = require('express');
-const common = require('../lib/common');
-const { restrict, checkAccess } = require('../lib/auth');
-const { indexOrders } = require('../lib/indexing');
+const common = require('../../lib/common');
+const { restrict, checkAccess } = require('../../lib/auth');
+const { indexOrders } = require('../../lib/indexing');
 const router = express.Router();
 
 // Show orders

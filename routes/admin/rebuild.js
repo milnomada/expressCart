@@ -1,12 +1,6 @@
 const express = require('express');
-const common = require('../lib/common');
-const { restrict, checkAccess } = require('../lib/auth');
-const { indexProducts } = require('../lib/indexing');
-const { validateJson } = require('../lib/schema');
-const colors = require('colors');
-const rimraf = require('rimraf');
-const fs = require('fs');
-const path = require('path');
+const common = require('../../lib/common');
+const { restrict } = require('../../lib/auth');
 const router = express.Router();
 
 router.get('/admin/rebuilds', restrict, async (req, res, next) => {

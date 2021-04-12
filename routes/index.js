@@ -37,8 +37,11 @@ router.get('/checkout', async (req, res, next) => {
     return;
   }
 
+  // the checkout & pay it's mostly the same
+  res.redirect("/pay");
+
   // render the checkout
-  res.render(`${config.themeViews}checkout`, {
+  /* res.render(`${config.themeViews}checkout`, {
     title: 'Checkout',
     // TODO: remove or filter config
     config: req.app.config,
@@ -50,7 +53,7 @@ router.get('/checkout', async (req, res, next) => {
     messageType: clearSessionValue(req.session, 'messageType'),
     helpers: req.handlebars.helpers,
     showFooter: 'showFooter'
-  });
+  }); */
 });
 
 
@@ -526,43 +529,6 @@ router.get(['/page/:pageNum', '/lamp/:pageNum'], (req, res, next) => {
     }
   })
 
-  /* Promise.all([getData(req, req.params.pageNum), getMenu(db)])
-  .then(([results, menu]) => {
-      console.log(results)
-      // If JSON query param return json instead
-      if(req.query.json === 'true'){
-          res.status(200).json(results.data);
-          return;
-      }
-      if(results.data.length === 0){
-          res.status(200).json(results.data);
-          return;
-      }
-      Promise.all([getImages(results.data[0]._id, req, res)]).then(([images]) => {
-        console.log(images.length)
-        res.render(`${config.themeViews}index`, {
-          title: 'Shop',
-          results: results.data,
-          images: images,
-          session: req.session,
-          message: clearSessionValue(req.session, 'message'),
-          messageType: clearSessionValue(req.session, 'messageType'),
-          metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
-          pageCloseBtn: showCartCloseBtn('page'),
-          config: req.app.config,
-          productsPerPage: numberProducts,
-          totalProductCount: results.totalProducts,
-          pageNum: req.params.pageNum,
-          paginateUrl: 'page',
-          helpers: req.handlebars.helpers,
-          showFooter: 'showFooter',
-          menu: sortMenu(menu)
-        });
-      });
-  })
-  .catch((err) => {
-      console.error(colors.red('Error getting products for page', err));
-  }); */
 });
 
 

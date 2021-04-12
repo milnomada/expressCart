@@ -17,10 +17,6 @@ router.get('/cart/empty', async (req, res, next) => {
     emptyCart(req, res, req.headers["Content-Type"] === "application/json" ? "json" : "");
 });
 
-router.get('/cart/empty', async (req, res, next) => {
-    emptyCart(req, res, req.headers["Content-Type"] === "application/json" ? "json" : "");
-});
-
 
 router.get('/cart/partial', (req, res) => {
     const config = req.app.config;
@@ -180,14 +176,14 @@ router.post('/cart/product', async (req, res, next) => {
 });
 
 // Remove single product from cart
-router.delete('/cart/product', async (req, res, next) => {
+router.delete('/cart/product/:id', async (req, res, next) => {
     const db = req.app.db;
     let itemRemoved = false;
 
     // remove item from cart
     req.session.cart.forEach((item) => {
         if (item) {
-            if (item.productId === req.body.cartId) {
+            if (item.productId === req.params.id) {
                 itemRemoved = true;
                 req.session.cart = _.pull(req.session.cart, item);
             }
