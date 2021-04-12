@@ -49,7 +49,8 @@ test('[Fail] Add product to cart when subscription already added', async t => {
 
 test('[Success] Empty cart', async t => {
     const res = await g.request
-        .post('/product/emptycart')
+        .post('/product/cart/empty')
+        .headers({"Content-Type": "application/json"})
         .expect(200);
     t.deepEqual(res.body.message, 'Cart successfully emptied');
 });
