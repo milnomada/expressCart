@@ -2,7 +2,7 @@ import { serial as test } from 'ava';
 const {
     runBefore,
     g
-} = require('../helper');
+} = require('../lib/helper');
 
 test.before(async () => {
     await runBefore();

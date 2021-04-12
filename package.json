@@ -29,7 +29,7 @@
   "ava": {
     "serial": true,
     "files": [
-      "./test/specs/*.js"
+      "./test/*.js"
     ],
     "verbose": true,
     "environmentVariables": {
