@@ -205,5 +205,11 @@
 	"Choose payment mode": "Choose payment mode",
 	"PayPal": "PayPal",
 	"Cvc": "Cvc",
-	"Pay": "Pagar"
+	"Pay": "Pagar",
+	"Craft another like this": "Craft another like this",
+	"About": "About",
+	"Confirmed": "Confirmed",
+	"Started": "Started",
+	"Sent": "Sent",
+	"Recent rebuilds": "Recent rebuilds"
 }

@@ -178,14 +178,12 @@
 	"Light": "Luce",
 	"Payments": "Modi di pagamento",
 	"Credit card": "Carta bancomat",
-
-  "Insert credit card details": "Inserisci i detagli de la carta",
-  "Credit card number": "Numero di carta",
-  "Expire date": "Scadenza",
-  "Pay with": "Pagare con",
-  "redirection_html": "<span>Si aprirá il sito Paypal per confirmare il pagamento</span><br><small>Una volta il pago sia stato confermato, si aprirá questa pagina di nuovo mostrando i detagli de la transazione</small>",
-  "Pay": "Pagare",
-
+	"Insert credit card details": "Inserisci i detagli de la carta",
+	"Credit card number": "Numero di carta",
+	"Expire date": "Scadenza",
+	"Pay with": "Pagare con",
+	"redirection_html": "<span>Si aprirá il sito Paypal per confirmare il pagamento</span><br><small>Una volta il pago sia stato confermato, si aprirá questa pagina di nuovo mostrando i detagli de la transazione</small>",
+	"Pay": "Pagare",
 	"Delivery": "Spedizione",
 	"Returns": "Divoluzioni",
 	"Conditions": "Condizioni",
@@ -201,5 +199,6 @@
 	"Close": "Close",
 	"You can request a new rebuild of this piece": "You can request a new rebuild of this piece",
 	"It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy": "It would be an identical design built with the same measures, even if, as a handmade object, it would not be an exact copy",
-	"Send": "Send"
+	"Send": "Send",
+	"Craft another like this": "Craft another like this"
 }
