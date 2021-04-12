@@ -94,6 +94,7 @@
     "gulp-rename": "^1.4.0",
     "mime-db": "^1.42.0",
     "mkdirp": "0.5.5",
+    "nodemon": "2.0.7",
     "supertest": "^3.4.2",
     "supertest-session": "^4.0.0"
   },
