@@ -11,9 +11,9 @@ function isNumber(evt) {
 
 function deleteFromCart(element){
     $.ajax({
-        method: 'POST',
-        url: '/cart/remove/product',
-        data: { cartId: element.attr('data-id') }
+        method: 'DELETE',
+        url: `/cart/product/${element.attr('data-id')}`
+        // data: { cartId:  }
     })
     .done(function(msg){
         $('#cart-count').text(msg.totalCartItems);
@@ -1014,7 +1014,7 @@ $(document).ready(function(){
 
     $(document).on('click', '#empty-cart', function(e){
         $.ajax({
-            method: 'POST',
+            method: 'GET',
             url: '/cart/empty',
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("Content-Type", "application/json");
