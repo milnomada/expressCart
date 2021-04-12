@@ -63,15 +63,18 @@ switch(config.paymentGateway){
         break;
 }
 
-// require the routes
+// index routes
 const index = require('./routes/index');
 const cart = require('./routes/cart');
-const admin = require('./routes/admin');
-const product = require('./routes/product');
 const customer = require('./routes/customer');
-const order = require('./routes/order');
-const rebuild = require('./routes/rebuild');
-const user = require('./routes/user');
+// admin
+const admin = require('./routes/admin/admin');
+const product = require('./routes/admin/product');
+const adminCustomer = require('./routes/admin/customer');
+const order = require('./routes/admin/order');
+const rebuild = require('./routes/admin/rebuild');
+const user = require('./routes/admin/user');
+// payments
 const paypal = require('./routes/payments/paypal');
 const stripe = require('./routes/payments/stripe');
 const authorizenet = require('./routes/payments/authorizenet');
@@ -365,6 +368,7 @@ app.use((req, res, next) => {
 app.use('/', index);
 app.use('/', cart);
 app.use('/', customer);
+app.use('/', adminCustomer);
 app.use('/', product);
 app.use('/', order);
 app.use('/', rebuild);

@@ -808,7 +808,7 @@ $(document).ready(function(){
             e.preventDefault();
             $.ajax({
                 method: 'POST',
-                url: '/admin/login_action',
+                url: '/admin/login',
                 data: {
                     email: $('#email').val(),
                     password: $('#password').val()
@@ -830,7 +830,7 @@ $(document).ready(function(){
             e.preventDefault();
             $.ajax({
                 method: 'POST',
-                url: '/customer/login_action',
+                url: '/customer/login',
                 data: {
                     loginEmail: $('#customerLoginEmail').val(),
                     loginPassword: $('#customerLoginPassword').val()
