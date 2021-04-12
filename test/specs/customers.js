@@ -84,7 +84,7 @@ test('[Success] Get single customer', async t => {
 
 test('[Fail] Customer login with incorrect email', async t => {
     const res = await g.request
-        .post('/customer/login_action')
+        .post('/customer/login')
         .send({
             loginEmail: 'test1@test.com',
             loginPassword: 'test'
@@ -95,7 +95,7 @@ test('[Fail] Customer login with incorrect email', async t => {
 
 test('[Success] Customer login with correct email', async t => {
     const res = await g.request
-        .post('/customer/login_action')
+        .post('/customer/login')
         .send({
             loginEmail: g.customers[0].email,
             loginPassword: 'test'

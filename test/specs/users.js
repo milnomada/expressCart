@@ -11,7 +11,7 @@ test.before(async () => {
 test('[Success] Create API key', async t => {
     // Login
     await g.request
-        .post('/admin/login_action')
+        .post('/admin/login')
         .send({
             email: g.users[0].userEmail,
             password: 'test'
@@ -27,7 +27,7 @@ test('[Success] Create API key', async t => {
 
 test('[Success] User Login', async t => {
     const res = await g.request
-        .post('/admin/login_action')
+        .post('/admin/login')
         .send({
             email: g.users[0].userEmail,
             password: 'test'
@@ -38,7 +38,7 @@ test('[Success] User Login', async t => {
 
 test('[Fail] Incorrect user password', async t => {
     const res = await g.request
-        .post('/admin/login_action')
+        .post('/admin/login')
         .send({
             email: g.users[0].userEmail,
             password: 'test1'
