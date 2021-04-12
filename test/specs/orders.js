@@ -1,4 +1,4 @@
-import{ serial as test }from'ava';
+import { serial as test } from 'ava';
 const {
     runBefore,
     g

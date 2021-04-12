@@ -1,4 +1,4 @@
-import{ serial as test }from'ava';
+import { serial as test } from 'ava';
 const {
     runBefore,
     g
@@ -50,8 +50,6 @@ test('[Fail] Add product to cart when subscription already added', async t => {
 test('[Success] Empty cart', async t => {
     const res = await g.request
         .post('/cart/empty')
-        /* ^^ From 
-         * https://www.npmjs.com/package/supertest */
         .set({"Content-Type": "application/json"})
         .expect(200);
     t.deepEqual(res.body.message, 'Cart successfully emptied');
@@ -120,7 +118,6 @@ test('[Success] Remove item previously added to cart', async t => {
 
 test('[Fail] Try remove an item which is not in the cart', async t => {
     const res = await g.request
-        })
         .delete('/cart/product/' + 'bogus_product_id')
         //.send({
         //    cartId: g.products[0]._id
@@ -134,8 +131,11 @@ test('[Success] Search products', async t => {
         .get('/category/backpack?json=true')
         .expect(200);
 
+    console.log(res.body);
+
     // Should be two backpack products
-    t.deepEqual(res.body.length, 2);
+    // FIX: `/category/:cat` returns MAX elements: config.productsPerPage
+    t.deepEqual(res.body.length, g.config.productsPerPage);
 });
 
 test('[Success] Filter products', async t => {
@@ -144,6 +144,7 @@ test('[Success] Filter products', async t => {
         .set('apiKey', g.users[0].apiKey)
         .expect(200);
 
+    console.log(res.body);
     // Should be two backpack products
     t.deepEqual(res.body.length, 2);
 });
