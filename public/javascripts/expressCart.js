@@ -12,7 +12,7 @@ function isNumber(evt) {
 function deleteFromCart(element){
     $.ajax({
         method: 'POST',
-        url: '/product/removefromcart',
+        url: '/cart/remove/product',
         data: { cartId: element.attr('data-id') }
     })
     .done(function(msg){

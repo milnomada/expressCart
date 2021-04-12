@@ -25,56 +25,117 @@ const {
 
 const common = require('../lib/common');
 
-// These is the customer facing routes
-router.get('/payment/:orderId', async (req, res, next) => {
-  const db = req.app.db;
-  const config = req.app.config;
 
-  // Get the order
-  const order = await db.orders.findOne({ _id: getId(req.params.orderId) });
-  if (!order) {
-    res.render('error', { title: 'Not found', message: 'Order not found', helpers: req.handlebars.helpers, config });
-    return;
+const enrichProduct = (product, rebuild) => {
+  // new product into session cart
+  const p = {};
+
+  p.productId = rebuild.productId;
+  p.title = product.productTitle;
+  p.quantity = rebuild.units;
+  p.uniqueProduct = product.uniqueProduct;
+  if (product.productDiscount && product.productDiscount > 0)
+    p.totalItemPrice = (product.productPrice - (product.productPrice / product.productDiscount)) * rebuild.units;
+  else
+    p.totalItemPrice = product.productPrice * rebuild.units;
+
+  p.options = product.productOptions;
+  p.productImage = product.productImage;
+  p.productDiscount = product.productDiscount;
+  p.productComment = product.productComment;
+  p.productSubscription = product.productSubscription;
+  p.rebuildId = rebuild._id;
+  if (product.productPermalink) {
+    p.link = product.productPermalink;
+  } else {
+    p.link = product._id;
   }
+  return p
+}
 
-  // If stock management is turned on payment approved update stock level
-  if (config.trackStock && req.session.paymentApproved) {
-    order.orderProducts.forEach(async (product) => {
-      const dbProduct = await db.products.findOne({ _id: getId(product.productId) });
-      let newStockLevel = dbProduct.productStock - product.quantity;
-      if (newStockLevel < 1) {
-        newStockLevel = 0;
-      }
+const productToSession = async (req, product) => {
+  // load product into session,
+  req.session.cart = []
+  // Doesnt exist so we add to the cart session
+  req.session.cartTotalItems = product.quantity;
+  // merge into the current cart
+  req.session.cart.push(product);
 
-      // Update product stock
-      await db.products.updateOne({
-        _id: getId(product.productId)
-      }, {
-        $set: {
-          productStock: newStockLevel
-        }
-      }, { multi: false });
+  // Add rebuild data to session
+  req.session.isRebuild = true;
+  req.session.rebuildId = product.rebuildId;
+
+  // Update cart to the DB
+  await db.cart.updateOne(
+    { sessionId: req.session.id },
+    { $set: { cart: req.session.cart } },
+    { upsert: true }
+  );
+}
+
+const fetchProducts = async (req, res, fn) => {
+  const
+    config = req.app.config,
+    numberProducts = req.query.size ? req.query.size : config.productsPerPage,
+    offset = req.query.offset ? req.query.offset : (req.params.pageNum ? req.params.pageNum : 0)
+    ;
+  // Promise.all([getData(req, req.params.pageNum), getMenu(db)])
+  Promise.all([getData(req, offset, null, numberProducts)])
+    .then(([results]) => {
+      console.log(results)
+      // If JSON query param return json instead
+
+      Promise.all([getImages(results.data[0]._id, req, res)]).then(([images]) => {
+        console.log(images.length)
+        fn(null, { results: results, images: images })
+        /*res.render(`${config.themeViews}index`, {
+          title: 'Shop',
+          results: results.data,
+          images: images,
+          session: req.session,
+          message: clearSessionValue(req.session, 'message'),
+          messageType: clearSessionValue(req.session, 'messageType'),
+          metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
+          pageCloseBtn: showCartCloseBtn('page'),
+          config: req.app.config,
+          productsPerPage: numberProducts,
+          totalProductCount: results.totalProducts,
+          pageNum: req.params.pageNum,
+          paginateUrl: 'page',
+          helpers: req.handlebars.helpers,
+          showFooter: 'showFooter',
+          // menu: [sortMenu(menu)]
+        }); */
+      });
+    })
+    .catch((err) => {
+      console.error(colors.red('Error getting products for page', err));
+      fn(err, null)
     });
-  }
+}
 
-  // If hooks are configured, send hook
-  if (config.orderHook) {
-    await hooker(order);
-  };
+const fetchProduct = async (req, res, id, fn) => {
+  console.log(id)
+  Promise.all([
+    req.app.db.products.findOne({ $or: [{ _id: getId(id) }, { productPermalink: id }] })
+  ])
+    .then(([product]) => {
+      Promise.all([getImages(product._id, req, res)]).then(([images]) => {
+        product.images = images
+        fn(null, product)
+      });
+    })
+    .catch((err) => {
+      console.error(colors.red('Error getting products for page', err));
+      fn(err, null)
+    });
+}
 
-  res.render(`${config.themeViews}payment_complete`, {
-    title: 'Payment complete',
-    config: req.app.config,
-    session: req.session,
-    pageCloseBtn: showCartCloseBtn('payment'),
-    result: order,
-    message: clearSessionValue(req.session, 'message'),
-    messageType: clearSessionValue(req.session, 'messageType'),
-    helpers: req.handlebars.helpers,
-    showFooter: 'showFooter',
-    menu: sortMenu(await getMenu(db))
-  });
-});
+const publicConfig = {
+  availableLanguages: "",
+  defaultLocale: "",
+  currencySymbol: ""
+}
 
 
 router.get('/cart/empty', async (req, res, next) => {
@@ -93,6 +154,37 @@ router.get('/cart/partial', (req, res) => {
     config: req.app.config,
     session: req.session
   });
+});
+
+// Remove single product from cart
+router.post('/cart/remove/product', async (req, res, next) => {
+  const db = req.app.db;
+  let itemRemoved = false;
+
+  // remove item from cart
+  req.session.cart.forEach((item) => {
+    if (item) {
+      if (item.productId === req.body.cartId) {
+        itemRemoved = true;
+        req.session.cart = _.pull(req.session.cart, item);
+      }
+    }
+  });
+
+  // Update cart in DB
+  await db.cart.updateOne({ sessionId: req.session.id }, {
+    $set: { cart: req.session.cart }
+  });
+  // update total cart amount
+  updateTotalCartAmount(req, res);
+
+  // Update checking cart for subscription
+  updateSubscriptionCheck(req, res);
+
+  if (itemRemoved === false) {
+    return res.status(400).json({ message: 'Product not found in cart' });
+  }
+  return res.status(200).json({ message: 'Product successfully removed', totalCartItems: Object.keys(req.session.cart).length });
 });
 
 // Updates a single product quantity
@@ -217,6 +309,57 @@ router.get('/pay', async (req, res, next) => {
   });
 });
 
+// These is the customer facing routes
+router.get('/payment/:orderId', async (req, res, next) => {
+  const db = req.app.db;
+  const config = req.app.config;
+
+  // Get the order
+  const order = await db.orders.findOne({ _id: getId(req.params.orderId) });
+  if (!order) {
+    res.render('error', { title: 'Not found', message: 'Order not found', helpers: req.handlebars.helpers, config });
+    return;
+  }
+
+  // If stock management is turned on payment approved update stock level
+  if (config.trackStock && req.session.paymentApproved) {
+    order.orderProducts.forEach(async (product) => {
+      const dbProduct = await db.products.findOne({ _id: getId(product.productId) });
+      let newStockLevel = dbProduct.productStock - product.quantity;
+      if (newStockLevel < 1) {
+        newStockLevel = 0;
+      }
+
+      // Update product stock
+      await db.products.updateOne({
+        _id: getId(product.productId)
+      }, {
+        $set: {
+          productStock: newStockLevel
+        }
+      }, { multi: false });
+    });
+  }
+
+  // If hooks are configured, send hook
+  if (config.orderHook) {
+    await hooker(order);
+  };
+
+  res.render(`${config.themeViews}payment_complete`, {
+    title: 'Payment complete',
+    config: req.app.config,
+    session: req.session,
+    pageCloseBtn: showCartCloseBtn('payment'),
+    result: order,
+    message: clearSessionValue(req.session, 'message'),
+    messageType: clearSessionValue(req.session, 'messageType'),
+    helpers: req.handlebars.helpers,
+    showFooter: 'showFooter',
+    menu: sortMenu(await getMenu(db))
+  });
+});
+
 // test
 router.post('/product/sendme', (req, res, next) => {
   console.log(req.body)
@@ -297,37 +440,6 @@ router.get(['/product/:id'], async (req, res) => {
   });
 });
 
-// Remove single product from cart
-router.post('/product/removefromcart', async (req, res, next) => {
-  const db = req.app.db;
-  let itemRemoved = false;
-
-  // remove item from cart
-  req.session.cart.forEach((item) => {
-    if (item) {
-      if (item.productId === req.body.cartId) {
-        itemRemoved = true;
-        req.session.cart = _.pull(req.session.cart, item);
-      }
-    }
-  });
-
-  // Update cart in DB
-  await db.cart.updateOne({ sessionId: req.session.id }, {
-    $set: { cart: req.session.cart }
-  });
-  // update total cart amount
-  updateTotalCartAmount(req, res);
-
-  // Update checking cart for subscription
-  updateSubscriptionCheck(req, res);
-
-  if (itemRemoved === false) {
-    return res.status(400).json({ message: 'Product not found in cart' });
-  }
-  return res.status(200).json({ message: 'Product successfully removed', totalCartItems: Object.keys(req.session.cart).length });
-});
-
 // Totally empty the cart
 /*
 Deprecated in favour of /cart/empty and $.ajax Content-Type headers
@@ -405,118 +517,6 @@ router.post('/product/rebuild', checkLogin, async (req, res, next) => {
     }
   }
 });
-
-
-const enrichProduct = (product, rebuild) => {
-  // new product into session cart
-  const p = {};
-
-  p.productId = rebuild.productId;
-  p.title = product.productTitle;
-  p.quantity = rebuild.units;
-  p.uniqueProduct = product.uniqueProduct;
-  if (product.productDiscount && product.productDiscount > 0)
-    p.totalItemPrice = (product.productPrice - (product.productPrice / product.productDiscount)) * rebuild.units;
-  else
-    p.totalItemPrice = product.productPrice * rebuild.units;
-
-  p.options = product.productOptions;
-  p.productImage = product.productImage;
-  p.productDiscount = product.productDiscount;
-  p.productComment = product.productComment;
-  p.productSubscription = product.productSubscription;
-  p.rebuildId = rebuild._id;
-  if (product.productPermalink) {
-    p.link = product.productPermalink;
-  } else {
-    p.link = product._id;
-  }
-  return p
-}
-
-const productToSession = async (req, product) => {
-  // load product into session,
-  req.session.cart = []
-  // Doesnt exist so we add to the cart session
-  req.session.cartTotalItems = product.quantity;
-  // merge into the current cart
-  req.session.cart.push(product);
-
-  // Add rebuild data to session
-  req.session.isRebuild = true;
-  req.session.rebuildId = product.rebuildId;
-
-  // Update cart to the DB
-  await db.cart.updateOne(
-    { sessionId: req.session.id },
-    { $set: { cart: req.session.cart } },
-    { upsert: true }
-  );
-}
-
-const fetchProducts = async (req, res, fn) => {
-  const
-    config = req.app.config,
-    numberProducts = req.query.size ? req.query.size : config.productsPerPage,
-    offset = req.query.offset ? req.query.offset : (req.params.pageNum ? req.params.pageNum : 0)
-    ;
-  // Promise.all([getData(req, req.params.pageNum), getMenu(db)])
-  Promise.all([getData(req, offset, null, numberProducts)])
-    .then(([results]) => {
-      console.log(results)
-      // If JSON query param return json instead
-
-      Promise.all([getImages(results.data[0]._id, req, res)]).then(([images]) => {
-        console.log(images.length)
-        fn(null, { results: results, images: images })
-        /*res.render(`${config.themeViews}index`, {
-          title: 'Shop',
-          results: results.data,
-          images: images,
-          session: req.session,
-          message: clearSessionValue(req.session, 'message'),
-          messageType: clearSessionValue(req.session, 'messageType'),
-          metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
-          pageCloseBtn: showCartCloseBtn('page'),
-          config: req.app.config,
-          productsPerPage: numberProducts,
-          totalProductCount: results.totalProducts,
-          pageNum: req.params.pageNum,
-          paginateUrl: 'page',
-          helpers: req.handlebars.helpers,
-          showFooter: 'showFooter',
-          // menu: [sortMenu(menu)]
-        }); */
-      });
-    })
-    .catch((err) => {
-      console.error(colors.red('Error getting products for page', err));
-      fn(err, null)
-    });
-}
-
-const fetchProduct = async (req, res, id, fn) => {
-  console.log(id)
-  Promise.all([
-    req.app.db.products.findOne({ $or: [{ _id: getId(id) }, { productPermalink: id }] })
-  ])
-    .then(([product]) => {
-      Promise.all([getImages(product._id, req, res)]).then(([images]) => {
-        product.images = images
-        fn(null, product)
-      });
-    })
-    .catch((err) => {
-      console.error(colors.red('Error getting products for page', err));
-      fn(err, null)
-    });
-}
-
-const publicConfig = {
-  availableLanguages: "",
-  defaultLocale: "",
-  currencySymbol: ""
-}
 
 // Craft another like this feature
 router.get('/product/rebuild/:hash/:extra', async (req, res, next) => {
@@ -973,7 +973,7 @@ router.get('/api/lamp', (req, res, next) => {
         // metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
         // pageCloseBtn: showCartCloseBtn('page'),
         config: conf,
-        productsPerPage: numberProducts,
+        productsPerPage: results.data.length,
         totalProductCount: results.totalProducts,
         pageNum: req.params.pageNum,
         // paginateUrl: 'page',

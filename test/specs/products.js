@@ -49,8 +49,10 @@ test('[Fail] Add product to cart when subscription already added', async t => {
 
 test('[Success] Empty cart', async t => {
     const res = await g.request
-        .post('/product/cart/empty')
-        .headers({"Content-Type": "application/json"})
+        .post('/cart/empty')
+        /* ^^ From 
+         * https://www.npmjs.com/package/supertest */
+        .set({"Content-Type": "application/json"})
         .expect(200);
     t.deepEqual(res.body.message, 'Cart successfully emptied');
 });
@@ -108,7 +110,7 @@ test('[Fail] Add incorrect product to cart', async t => {
 
 test('[Success] Remove item previously added to cart', async t => {
     const res = await g.request
-        .post('/product/removefromcart')
+        .post('/cart/remove/product')
         .send({
             cartId: g.products[0]._id
         })
@@ -118,7 +120,7 @@ test('[Success] Remove item previously added to cart', async t => {
 
 test('[Fail] Try remove an item which is not in the cart', async t => {
     const res = await g.request
-        .post('/product/removefromcart')
+        .post('/cart/remove/product')
         .send({
             cartId: 'bogus_product_id'
         })
