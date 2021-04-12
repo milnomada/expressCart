@@ -173,7 +173,7 @@ router.post('/product/sendme', (req, res, next) => {
 });
 
 // show an individual product
-router.get(['/product/:id'], async (req, res) => {
+router.get('/product/:id', async (req, res) => {
   const db = req.app.db;
   const config = req.app.config;
 
@@ -488,7 +488,7 @@ router.get('/sitemap.xml', (req, res, next) => {
 });
 
 
-router.get(['/page/:pageNum', '/lamp/:pageNum'], (req, res, next) => {
+router.get('/page/:pageNum', (req, res, next) => {
   const config = req.app.config;
   const numberProducts = config.productsPerPage ? config.productsPerPage : 6;
 
@@ -528,58 +528,37 @@ router.get(['/page/:pageNum', '/lamp/:pageNum'], (req, res, next) => {
       });
     }
   })
-
 });
 
 
-router.get('/api/lamp', (req, res, next) => {
+router.get('/lamp/:name', (req, res, next) => {
 
-  fetchProducts(req, res, (err, data) => {
-    if (err) {
-      console.error(colors.red('Error getting products for page', err));
-    } else {
-      const { results, images } = data
-      var conf = Object()
-      Object.keys(publicConfig).map((k) => { conf[k] = req.app.config[k] })
-      console.log(data)
-      res.json({
-        // title: 'Shop',
-        results: results.data,
-        images: images,
-        session: req.session,
-        // message: clearSessionValue(req.session, 'message'),
-        // messageType: clearSessionValue(req.session, 'messageType'),
-        // metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
-        // pageCloseBtn: showCartCloseBtn('page'),
-        config: conf,
-        productsPerPage: results.data.length,
-        totalProductCount: results.totalProducts,
-        pageNum: req.params.pageNum,
-        // paginateUrl: 'page',
-        // helpers: req.handlebars.helpers,
-        // showFooter: 'showFooter',
-        // menu: sortMenu(menu)
-      });
-    }
-  })
-});
-
-
-router.get('/api/lamp/:id', (req, res, next) => {
-
-  fetchProduct(req, res, req.params.id, (err, data) => {
-    if (err) {
-      console.error(colors.red(`Error getting product for id ${req.params.id}`, err));
-    } else {
-      var conf = Object()
-      Object.keys(publicConfig).map((k) => { conf[k] = req.app.config[k] })
-      console.log(data)
-      res.json({
-        result: data,
-        session: req.session,
-        config: conf
-      });
-    }
+  fetchProduct(req, res, req.params.name, (err, data) => {
+      if (err) {
+          console.error(colors.red('Error getting products for page', err));
+          res.status(404).json({})
+      } else {
+          const { results, images } = data
+          var conf = Object()
+          Object.keys(publicConfig).map((k) => { conf[k] = req.app.config[k] })
+          console.log(data)
+          res.json({
+              // title: 'Shop',
+              results: data,
+              images: images,
+              session: req.session,
+              // message: clearSessionValue(req.session, 'message'),
+              // messageType: clearSessionValue(req.session, 'messageType'),
+              // metaDescription: req.app.config.cartTitle + ' - Products page: ' + req.params.pageNum,
+              // pageCloseBtn: showCartCloseBtn('page'),
+              config: conf,
+              productsPerPage: data.length,
+              // paginateUrl: 'page',
+              // helpers: req.handlebars.helpers,
+              // showFooter: 'showFooter',
+              // menu: sortMenu(menu)
+          });
+      }
   })
 });
 
