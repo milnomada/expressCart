@@ -85,7 +85,7 @@
             "type": "string",
             "enum": ["paypal", "stripe", "authorizenet", "adyen"]
         },
-        "databaseConnectionString": {
+        "dbUri": {
             "type": "string"
         },
         "theme": {
@@ -130,7 +130,7 @@
         "emailPassword",
         "emailAddress",
         "paymentGateway",
-        "databaseConnectionString"
+        "dbUri"
     ],
     "additionalProperties": false
 }
