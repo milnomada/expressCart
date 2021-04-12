@@ -5,8 +5,7 @@ try {
   var ctx = document.getElementById('rebuilds').getContext('2d');
 } catch(e) {
   var ctx = null;
-} 
-
+}
 
 var genChart = function(type, labels, data){
   switch(type) {
@@ -29,22 +28,21 @@ var genColors = function(data, alpha) {
   return [cArr, cHdArr]
 }
 
-var genBarChart = function(labels, data) {
-  var colors = genColors(data, [0.2, 1]),
-    colorFill = colors[0],
-    borderColor = colors[1];
+var genBarChart = function(labels, dss) {
+  
 
   var myChart = new Chart(ctx, {
       type: 'bar',
       data: {
           labels: labels,
-          datasets: [{
+          datasets: dss
+          /* [{
               label: 'Rebuilds',
               data: data,
               backgroundColor: colorFill,
               borderColor: borderColor,
               borderWidth: 1
-          }]
+          }] */
       },
       options: {
           scales: {
@@ -66,7 +64,7 @@ var genBarChart = function(labels, data) {
   });
 }
 
-var formatRebuilds = function(){
+var __formatRebuilds = function(){
   var dt = [], moments = {}, cur, keys, datum = [], labels = [];
   $.each( $('.rebuild-dt'), function(i, e){ dt.push($(e).attr('data-dt')) });
   for(var i in dt) {
@@ -87,6 +85,90 @@ var formatRebuilds = function(){
   }
 }
 
+var loadStatusArr = function() {
+  var status = []
+  // prepare distinct statuses, one per dataset
+  $.each( $('.rebuilds tr'), function(i, e){ 
+    var st = $(e).find('.fa-circle').attr('data-status')
+    console.log("status", i, st)
+    if(st && status.indexOf(st) == -1) {
+      status.push(st)
+    }
+  })
+
+  return status;
+}
+
+var buildLog = function(status) {
+  var log = {}, dtArr = [], index;
+  // load per status data
+  // i:         status-column, 
+  // arr[i]:    status-occurence for this value
+  $.each( $('.rebuilds tr'), function(i, e){ 
+    var dt = $(e).find('.rebuild-dt').attr('data-dt'),
+        cur = moment(dt).format("MM-YYYY"),
+        st
+        ;
+
+    if(Object.keys(log).indexOf(cur) == -1) {
+      // start datasets
+      log[cur] = []
+      // one position per status
+      for(var i in status)
+        log[cur].push(0)
+      // append formatted date
+      dtArr.push(cur) 
+    } else {
+      st = $(e).find('.fa-circle').attr('data-status')
+      index = status.indexOf(st)
+      log[cur][index] += 1
+    }
+  });
+
+  return {
+    log: log,
+    dtArr: dtArr
+  }
+}
+
+var formatRebuilds = function(){
+  var dtArr, 
+      log,      
+      dss = [],
+      status,
+      data,
+      statusInt
+      ;
+
+  status = loadStatusArr()
+  console.log("status Arr", status)
+
+  logObj = buildLog(status)
+  log = logObj.log          // key-value matrix, string --> Array(maxDistinctStatus)
+  dtArr = logObj.dtArr      // single formatted dates array
+
+  // generate chart dss with previous datasets
+  for(var i=0; i < status.length; i++) {
+    data = []
+    statusInt = parseInt(status[i])
+    // load values for this dataset from its relative column in log matrix
+    for(var d in log) {
+      data.push(log[d][i])
+    }
+    dss.push({
+      label: getRebuildStatusName(statusInt),
+      data: data,
+      backgroundColor: getRebuildStatusColor(statusInt) + "33", // add opacity hexadecimal [00...ff]
+      borderColor: getRebuildStatusColor(statusInt) + "ff",     // add dense opacity to border
+      borderWidth: 1
+    })
+  }
+  return {
+    labels: dtArr,
+    data: dss
+  }
+}
+
 var getRebuildStatusColor = function(s){
   switch(s){
     case 0: // created
@@ -101,6 +183,23 @@ var getRebuildStatusColor = function(s){
       return '#00bcd4'
     case 5: // cancelled
       return '#fd2222'
+  }
+}
+
+var getRebuildStatusName = function(s){
+  switch(s){
+    case 0: // created
+      return 'created'
+    case 1: // confirmed
+      return 'confirmed'
+    case 2: // paid
+      return 'paid'
+    case 3: // started -- building...
+      return 'started'
+    case 4: // sent
+      return 'sent'
+    case 5: // cancelled
+      return 'cancelled'
   }
 }
 

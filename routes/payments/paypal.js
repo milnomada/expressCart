@@ -234,7 +234,6 @@ router.get('/checkout_return', (req, res, next) => {
     });
 });
 
-// The homepage of the site
 router.post('/checkout_action', (req, res, next) => {
     const db = req.app.db;
     const config = req.app.config;

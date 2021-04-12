@@ -471,6 +471,7 @@ router.post('/admin/file/delete', restrict, checkAccess, async (req, res) => {
     }
 });
 
+
 router.get('/admin/files', restrict, async (req, res) => {
     // loop files in /public/uploads/
     const files = await glob.sync('public/uploads/**', { nosort: true });
