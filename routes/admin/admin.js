@@ -100,7 +100,7 @@ router.get('/admin/setup', async (req, res) => {
 });
 
 // insert a user
-router.post('/admin/setup_action', async (req, res) => {
+router.post('/admin/setup', async (req, res) => {
     const db = req.app.db;
 
     const doc = {

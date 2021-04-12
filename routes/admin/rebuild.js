@@ -20,6 +20,7 @@ router.get('/admin/rebuilds', restrict, async (req, res, next) => {
 });
 
 // delete order
+// TODO: change it to delete
 router.get('/admin/rebuild/delete/:id', restrict, async(req, res) => {
     const db = req.app.db;
 

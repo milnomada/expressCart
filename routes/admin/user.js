@@ -5,6 +5,7 @@ const colors = require('colors');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 
+
 router.get('/admin/users', restrict, async (req, res) => {
     const db = req.app.db;
     const users = await db.users.find({}, { projection: { userPassword: 0 } }).toArray();
@@ -85,6 +86,7 @@ router.get('/admin/user/new', restrict, (req, res) => {
 });
 
 // delete user
+// TODO: change it to DELETE
 router.get('/admin/user/delete/:id', restrict, async (req, res) => {
     const db = req.app.db;
 

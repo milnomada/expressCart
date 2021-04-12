@@ -107,7 +107,7 @@ router.get('/customer/forgotten', (req, res) => {
 });
 
 // forgotten password
-router.post('/customer/forgotten_action', async (req, res) => {
+router.post('/customer/forgotten', async (req, res) => {
     const db = req.app.db;
     const config = req.app.config;
     const passwordToken = randtoken.generate(30);
