@@ -4,6 +4,7 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const hbs = require('express-handlebars');
 const moment = require('moment');
 const _ = require('lodash');
 const MongoStore = require('connect-mongodb-session')(session);
@@ -16,16 +17,15 @@ const common = require('./lib/common');
 const { runIndexing } = require('./lib/indexing');
 const { addSchemas } = require('./lib/schema');
 const { initDb } = require('./lib/db');
-let handlebars = require('express-handlebars');
 const i18n = require('i18n');
+const app = express();
 
 // Validate our settings schema
 const Ajv = require('ajv');
 const ajv = new Ajv({ useDefaults: true });
 
-// get config
+// Validate config
 const config = common.getConfig();
-
 const baseConfig = ajv.validate(require('./config/baseSchema'), config);
 if(baseConfig === false){
     console.log(colors.red(`settings.json incorrect: ${ajv.errorsText()}`));
@@ -80,8 +80,6 @@ const stripe = require('./routes/payments/stripe');
 const authorizenet = require('./routes/payments/authorizenet');
 const adyen = require('./routes/payments/adyen');
 
-const app = express();
-
 // Language initialize
 i18n.configure({
     locales: config.availableLanguages,
@@ -98,7 +96,7 @@ i18n.configure({
 
 // view engine setup
 app.set('views', path.join(__dirname, '/views'));
-app.engine('hbs', handlebars({
+app.engine('hbs', hbs({
     extname: 'hbs',
     layoutsDir: path.join(__dirname, 'views', 'layouts'),
     defaultLayout: 'layout.hbs',
@@ -107,7 +105,7 @@ app.engine('hbs', handlebars({
 app.set('view engine', 'hbs');
 
 // helpers for the handlebar templating platform
-handlebars = handlebars.create({
+var handlebars = hbs.create({
     helpers: {
         // Language helper
         __: () => { return i18n.__(this, arguments); }, // eslint-disable-line no-undef
@@ -167,9 +165,9 @@ handlebars = handlebars.create({
         },
         amountNoDecimal: (amt) => {
             if(amt){
-                return handlebars.helpers.formatAmount(amt).replace('.', '');
+                return hbs.helpers.formatAmount(amt).replace('.', '');
             }
-            return handlebars.helpers.formatAmount(amt);
+            return hbs.helpers.formatAmount(amt);
         },
         getStatusRebuild: (status) => {
             switch(status){
@@ -318,10 +316,31 @@ if(!config.secretSession || config.secretSession === ''){
     common.updateConfigLocal({ secretSession: randomString });
 }
 
+/**
+ * This setting tells express is behind a proxy
+ * - X-Forwarded-Proto may be set by the reverse proxy
+ * - req.ip and req.ips values will be populated with X-Forwarded-For's list of addresses
+ * https://stackoverflow.com/questions/23413401/what-does-trust-proxy-actually-do-in-express-js-and-do-i-need-to-use-it
+ */
 app.enable('trust proxy');
+/**
+ * Helmet
+ * Helmet secures the connections to prevent among others CSS-Attacks, ClickHijacking,
+ * Http-Header-Poisoning attacks and so on
+ * https://www.geeksforgeeks.org/node-js-securing-apps-with-helmet-js/
+ */
 app.use(helmet());
+
 app.set('port', process.env.PORT || 1111);
+
+/**
+ * Morgan
+ * logger is a morgan instance. Morgan is and advanced login tool for Express
+ * https://www.npmjs.com/package/morgan
+ */
 app.use(logger('dev'));
+
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser(config.secretCookie));
 app.use(session({
@@ -462,21 +481,21 @@ initDb(config.databaseConnectionString, async (err, db) => {
 
     // We index when not in test env
     if(process.env.NODE_ENV !== 'test'){
-        try{
+        try {
             await runIndexing(app);
-        }catch(ex){
+        } catch(ex) {
             console.error(colors.red('Error setting up indexes:' + err));
         }
     }
 
     // Start the app
-    try{
+    try {
         await app.listen(app.get('port'));
         app.emit('appStarted');
-        if(process.env.NODE_ENV !== 'test'){
+        if(process.env.NODE_ENV !== 'test') {
             console.log(colors.green('expressCart running on host: http://localhost:' + app.get('port')));
         }
-    }catch(ex){
+    } catch(ex) {
         console.error(colors.red('Error starting expressCart app:' + err));
         process.exit(2);
     }
